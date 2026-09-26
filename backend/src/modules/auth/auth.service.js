@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const { User } = require('../../database/models');
 const generateToken = require('../../utils/generateToken');
 const generateOtp = require('../../utils/generateOtp');
-
+const sendEmail = require('../../utils/sendEmail');
 const SALT_ROUNDS = 10;
 
 const signup = async ({ name, email, password, role }) => {
@@ -62,8 +62,11 @@ const forgotPassword = async (email) => {
     user.otp_expires_at = expiresAt;
     await user.save();
 
-    console.log(`OTP for ${email}: ${otp}`);
-
+   await sendEmail({
+    to: email,
+    subject: 'StockSense Password Reset OTP',
+    text: `Your OTP is ${otp}. It expires in 10 minutes.`
+});
     return otp;
 };
 

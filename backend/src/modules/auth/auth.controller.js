@@ -32,12 +32,8 @@ const login = async (req, res, next) => {
 
 const forgotPassword = async (req, res, next) => {
     try {
-        const otp = await authService.forgotPassword(req.body.email);
-        res.status(200).json({
-            success: true,
-            message: 'OTP sent successfully',
-            otp // remove this field once you wire up real email sending
-        });
+        await authService.forgotPassword(req.body.email);
+        res.status(200).json({ success: true, message: 'OTP sent to your email' });
     } catch (err) {
         next(err);
     }
