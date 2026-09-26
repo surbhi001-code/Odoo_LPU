@@ -312,10 +312,4 @@ Do not expose `set-user-role.js` as a public signup option.
 - Completed or canceled documents cannot be edited.
 - Warehouse document filters on the backend check the source location; the dashboard also matches the destination in the UI.
 
-## What's Next
 
-- Per-page server queries for large catalogs instead of loading the full workspace
-- Warehouse-scoped users (data isolation by location)
-- Token blocklist or refresh tokens
-- Dedicated category management screens
-- Automated browser-to-MySQL test suite
