@@ -5,7 +5,9 @@ const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require('../../utils/sendEmail');
 const SALT_ROUNDS = 10;
 
-const signup = async ({ name, email, password }) => {
+const signupRoles = ['warehouse_staff', 'inventory_manager'];
+
+const signup = async ({ name, email, password, role }) => {
     const existing = await User.findOne({ where: { email } });
     if (existing) {
         const err = new Error('Email already registered');
@@ -19,7 +21,7 @@ const signup = async ({ name, email, password }) => {
         name,
         email,
         password_hash,
-        role: 'warehouse_staff'
+        role: signupRoles.includes(role) ? role : 'warehouse_staff'
     });
 
     const token = generateToken({ id: user.id, role: user.role });

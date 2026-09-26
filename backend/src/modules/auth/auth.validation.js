@@ -1,10 +1,15 @@
+const signupRoles = ['warehouse_staff', 'inventory_manager'];
+
 const validateSignup = (req, res, next) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: 'name, email and password are required' });
     }
     if (password.length < 6) {
         return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    }
+    if (role != null && role !== '' && !signupRoles.includes(role)) {
+        return res.status(400).json({ success: false, message: 'Choose Warehouse Staff or Inventory Manager' });
     }
     next();
 };

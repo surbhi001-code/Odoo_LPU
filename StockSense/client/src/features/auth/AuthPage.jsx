@@ -115,6 +115,7 @@ export default function AuthPage({ mode = 'login' }) {
     const email = String(data.get('email') || resetEmail || '').trim()
     const name = String(data.get('name') || '').trim()
     const password = String(data.get('password') || '')
+    const role = String(data.get('role') || 'warehouse_staff')
     const code = String(data.get('code') || '').trim()
 
     try {
@@ -164,7 +165,7 @@ export default function AuthPage({ mode = 'login' }) {
 
       const result =
         mode === 'signup'
-          ? await signup({ name, email, password })
+          ? await signup({ name, email, password, role })
           : await login({ email, password })
       const user = result.data?.user || {}
       startSession({
@@ -312,6 +313,27 @@ export default function AuthPage({ mode = 'login' }) {
                     required
                   />
                 )}
+                {mode === 'signup' && (
+                  <div>
+                    <label
+                      htmlFor="auth-role"
+                      className="mb-2 block text-xs font-semibold text-[#34483e]"
+                    >
+                      Role
+                    </label>
+                    <select
+                      id="auth-role"
+                      name="role"
+                      defaultValue="warehouse_staff"
+                      className="h-12 w-full rounded-lg border border-[#dfe6e1] bg-[#fbfcfb] px-3.5 text-sm text-[#233f32] transition focus:border-[#51836a] focus:bg-white focus:outline-2 focus:outline-offset-0 focus:outline-[#51836a]/15 max-sm:text-base [@media(max-height:700px)]:h-11"
+                    >
+                      <option value="warehouse_staff">Warehouse Staff</option>
+                      <option value="inventory_manager">
+                        Inventory Manager
+                      </option>
+                    </select>
+                  </div>
+                )}
                 {isResetCode && (
                   <>
                     <AuthInput
@@ -351,8 +373,8 @@ export default function AuthPage({ mode = 'login' }) {
               )}
               {mode === 'signup' && (
                 <p className="mt-2.5 text-[10px] text-[#8d9c91]">
-                  Use at least 6 characters. New accounts start as Warehouse
-                  Staff; an administrator can grant manager access.
+                  Use at least 6 characters. Choose Warehouse Staff or
+                  Inventory Manager — that role sets your permissions.
                 </p>
               )}
               {notice && (
