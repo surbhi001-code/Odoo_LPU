@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+}
+
+/* Only element defaults live here. Component styling uses JSX utilities. */
+@layer base {
+  body {
+    @apply m-0 bg-[#f6f8f7] font-sans font-normal text-[#293b36] antialiased;
+  }
+  button,
+  a {
+    @apply touch-manipulation;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+  button:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    @apply outline-3 outline-offset-3 outline-[#8fbd70];
+  }
+  input,
+  select,
+  textarea {
+    @apply text-[#34483f];
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply outline-2 outline-offset-1 outline-[#9dbfac];
+  }
+  h1 {
+    @apply text-[29px] leading-[1.4] font-extrabold tracking-[-1.05px];
+  }
+  h2 {
+    @apply text-[16px] font-[750] tracking-[-0.35px];
+  }
+  h3 {
+    @apply text-[14px] font-bold;
+  }
+  small {
+    @apply text-[11px];
+  }
+  svg {
+    @apply shrink-0;
+  }
+  *,
+  ::before,
+  ::after {
+    @apply motion-reduce:animate-none motion-reduce:transition-none motion-reduce:scroll-auto;
+  }
+}

@@ -1,0 +1,52 @@
+import { useEffect, useId, useRef } from 'react'
+import { X } from 'lucide-react'
+export default function Modal({
+  title,
+  description,
+  onClose,
+  children,
+  wide = false,
+}) {
+  const ref = useRef(null)
+  const titleId = useId()
+  useEffect(() => {
+    const dialog = ref.current
+    const previous = document.activeElement
+    dialog.showModal()
+    return () => {
+      dialog.close()
+      previous?.focus()
+    }
+  }, [])
+  return (
+    <dialog
+      aria-labelledby={titleId}
+      className={`m-auto overflow-y-auto rounded-[14px] border border-[#e4eadf] bg-white p-0 text-[#31472e] shadow-[0_24px_90px_#0b2a3040] max-w-[calc(100vw_-_32px)] max-h-[calc(100dvh_-_44px)] backdrop:bg-[#10291f6b] backdrop:backdrop-blur-[3px] ${wide ? 'w-[710px]' : 'w-[530px]'}`}
+      ref={ref}
+      onCancel={(event) => {
+        event.preventDefault()
+        onClose()
+      }}
+      onClick={(event) => {
+        if (event.target === ref.current) onClose()
+      }}
+    >
+      <div className="p-6.5 max-[520px]:p-[21px]">
+        <header className="flex items-start justify-between gap-4.5 mb-[25px] [&_h2]:text-[21px] [&_h2]:tracking-[-0.6px] [&_p]:text-[11px] [&_p]:leading-[1.7] [&_p]:text-[#88957d] [&_p]:mt-1.5 max-[520px]:[&_h2]:text-[20px]">
+          <div>
+            <h2 id={titleId}>{title}</h2>
+            {description && <p>{description}</p>}
+          </div>
+          <button
+            className="icon-button border-0 border-transparent inline-flex items-center justify-center w-[31px] h-[31px] rounded-[6px] bg-transparent text-[#819187] p-0 hover:bg-[#ecf2ed] hover:text-[#225c48]"
+            aria-label="Close dialog"
+            onClick={onClose}
+          >
+            <X size={20} />
+          </button>
+        </header>
+        {children}
+      </div>
+    </dialog>
+  )
+}
