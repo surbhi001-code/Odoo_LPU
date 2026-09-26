@@ -43,12 +43,14 @@ const createDocument = async (data, userId) => {
     });
 };
 
-const getAllDocuments = async ({ type, status, warehouse_id, page = 1, limit = 20 }) => {
+const getAllDocuments = async ({ type, status, warehouse_id, category_id, page = 1, limit = 20 }) => {
     const where = {};
     if (type) where.type = type;
     if (status) where.status = status;
 
     const locationWhere = warehouse_id ? { warehouse_id } : undefined;
+
+    const productWhere = category_id ? { category_id } : undefined;
 
     const offset = (page - 1) * limit;
 
@@ -63,12 +65,22 @@ const getAllDocuments = async ({ type, status, warehouse_id, page = 1, limit = 2
                 required: !!warehouse_id
             },
             { model: Location, as: 'destinationLocation', attributes: ['id', 'name', 'warehouse_id'] },
-            { model: DocumentLine, as: 'lines', include: [{ model: Product, attributes: ['id', 'name', 'sku'] }] }
+            {
+                model: DocumentLine,
+                as: 'lines',
+                include: [{
+                    model: Product,
+                    attributes: ['id', 'name', 'sku', 'category_id'],
+                    where: productWhere,
+                    required: !!category_id
+                }],
+                required: !!category_id // only pull documents that actually have a matching line
+            }
         ],
         limit: parseInt(limit),
         offset: parseInt(offset),
         order: [['created_at', 'DESC']],
-        distinct: true // keeps `count` accurate despite the joins above
+        distinct: true
     });
 
     return {
