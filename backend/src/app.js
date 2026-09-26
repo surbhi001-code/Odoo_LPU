@@ -1,11 +1,18 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors')
+const routes = require('./routes');
 const app = express();
 
 // core middleware
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 // health check — confirms server is alive before any modules exist
 app.get('/', (req, res) => {
     res.json({ success: true, message: 'StockSense API is running' });
