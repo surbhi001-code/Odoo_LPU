@@ -1,0 +1,47 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../config/db');
+
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: { isEmail: true }
+    },
+    password_hash: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    role: {
+        type: DataTypes.ENUM('admin', 'inventory_manager', 'warehouse_staff'),
+        allowNull: false,
+        defaultValue: 'warehouse_staff'
+    },
+    otp_code: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    otp_expires_at: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    is_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    tableName: 'users',
+    timestamps: true,
+    underscored: true
+});
+
+module.exports = User;
