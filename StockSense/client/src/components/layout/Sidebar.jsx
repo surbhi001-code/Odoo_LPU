@@ -1,8 +1,10 @@
-import { NavLink, Link } from 'react-router-dom'
-import { Search, X } from 'lucide-react'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { LogOut, X } from 'lucide-react'
 import { navigationGroups } from './navigation'
+import { endSession } from '../../features/auth/session'
 
-export default function Sidebar({ open, onClose, onSearch }) {
+export default function Sidebar({ open, onClose }) {
+  const navigate = useNavigate()
   return (
     <>
       {open && (
@@ -38,23 +40,6 @@ export default function Sidebar({ open, onClose, onSearch }) {
           <X size={17} />
         </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            onClose()
-            onSearch()
-          }}
-          aria-label="Open global search"
-          aria-keyshortcuts="Control+k Meta+k"
-          className="mb-7 flex min-h-10 items-center gap-2.5 rounded-lg border border-[#426154] bg-[#204538] px-3 text-left text-[#b7cbbd] transition hover:border-[#7b9d72] hover:bg-[#294e3e] focus-visible:outline-[#c6ee8a]"
-        >
-          <Search size={16} strokeWidth={1.7} />
-          <span className="min-w-0 flex-1 truncate text-[11px]">Search anything...</span>
-          <kbd className="rounded border border-[#52705c] px-1 py-0.5 font-sans text-[9px] text-[#92ae9a]">
-            Ctrl K
-          </kbd>
-        </button>
-
         <nav aria-label="Main navigation">
           {navigationGroups.map((group) => (
             <div key={group.label} className="mb-6">
@@ -78,6 +63,18 @@ export default function Sidebar({ open, onClose, onSearch }) {
             </div>
           ))}
         </nav>
+        <button
+          type="button"
+          onClick={() => {
+            onClose()
+            endSession()
+            navigate('/auth/login', { replace: true })
+          }}
+          className="mt-auto flex min-h-[42px] items-center gap-3 rounded-lg px-[13px] py-2.5 text-xs font-normal text-[#c9b4a4] transition hover:bg-[#3d322c] hover:text-white"
+        >
+          <LogOut size={18} strokeWidth={1.7} />
+          Log out
+        </button>
       </aside>
     </>
   )

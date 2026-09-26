@@ -92,7 +92,7 @@ export default function Topbar({ onMenu, menuOpen }) {
         title="Help"
         onClick={() =>
           notify(
-            'Start with a warehouse and products, then create a receipt. Use sidebar search to find products, operations, warehouses, or pages.',
+            'Start with a warehouse and products, then create a receipt.',
           )
         }
       >

@@ -3,38 +3,20 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
-import GlobalSearch from './GlobalSearch'
 import Button from '../ui/Button'
 import { useWorkspace } from '../../lib/workspaceContext'
 import { endSession } from '../../features/auth/session'
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
   const { state, error, reload } = useWorkspace()
   const { pathname } = useLocation()
   const isDashboard = pathname === '/'
   useEffect(() => {
     reload()
   }, [pathname, reload])
-  useEffect(() => {
-    function searchShortcut(event) {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-        if (document.querySelector('dialog[open]') && !searchOpen) return
-        event.preventDefault()
-        setMenuOpen(false)
-        setSearchOpen((value) => !value)
-      }
-    }
-    document.addEventListener('keydown', searchShortcut)
-    return () => document.removeEventListener('keydown', searchShortcut)
-  }, [searchOpen])
   return (
     <div className="min-h-screen">
-      <Sidebar
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        onSearch={() => setSearchOpen(true)}
-      />
+      <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
       <div className="ml-60 min-h-screen flex flex-col max-[1250px]:ml-[215px] max-[800px]:ml-0">
         <Topbar onMenu={() => setMenuOpen(true)} menuOpen={menuOpen} />
         <main
@@ -76,7 +58,6 @@ export default function Layout() {
           <span>Inventory management, simplified.</span>
         </footer>
       </div>
-      {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
     </div>
   )
 }
