@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal'
 import Field from '../../components/forms/Field'
 import { useWorkspace } from '../../lib/workspaceContext'
 import { quantityAt } from '../../lib/inventory'
+import LocationsDialog from './LocationsDialog'
 function WarehouseForm({ warehouse, onClose }) {
   const { mutate } = useWorkspace()
   const [form, setForm] = useState(
@@ -42,7 +43,7 @@ function WarehouseForm({ warehouse, onClose }) {
           {[
             ['name', 'Warehouse name', 'e.g. Main warehouse'],
             ['code', 'Short code', 'e.g. WH-MAIN'],
-            ['location', 'Location / address', 'e.g. Building A, Ground floor'],
+            ['location', 'Address', 'e.g. Building A, Ground floor'],
           ].map(([key, label, placeholder]) => (
             <Field
               key={key}
@@ -84,8 +85,9 @@ function WarehouseForm({ warehouse, onClose }) {
   )
 }
 export default function WarehousesPage() {
-  const { state } = useWorkspace()
+  const { state, canManage } = useWorkspace()
   const [editor, setEditor] = useState(null)
+  const [locationWarehouse, setLocationWarehouse] = useState(null)
   const [params, setParams] = useSearchParams()
   const query = params.get('q') || ''
   const warehouses = state.warehouses.filter((warehouse) =>
@@ -100,14 +102,18 @@ export default function WarehousesPage() {
   }
   return (
     <>
-      <PageHeader
-        title="Warehouses"
-      >
-        <Button onClick={() => setEditor({})}>
+      <PageHeader title="Warehouses">
+        <Button disabled={!canManage} onClick={() => setEditor({})}>
           <Plus size={17} />
           Add warehouse
         </Button>
       </PageHeader>
+      {!canManage && (
+        <p className="mb-4 rounded-lg border border-[#dfe7df] bg-white p-3 text-xs leading-6 text-[#68775f]">
+          Warehouse Staff can view warehouses and locations. Ask an
+          administrator for Inventory Manager access to add or edit them.
+        </p>
+      )}
       {query && (
         <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[#dfe7df] bg-white px-4 py-2.5 text-xs text-[#65776a]">
           <span className="truncate">Search results for “{query}”</span>
@@ -145,6 +151,7 @@ export default function WarehousesPage() {
                 <button
                   className="icon-button border-0 border-transparent inline-flex items-center justify-center w-[31px] h-[31px] rounded-[6px] bg-transparent text-[#819187] p-0 hover:bg-[#ecf2ed] hover:text-[#225c48]"
                   aria-label={`Edit ${w.name}`}
+                  disabled={!canManage}
                   onClick={() => setEditor(w)}
                 >
                   <Pencil size={17} />
@@ -165,6 +172,16 @@ export default function WarehousesPage() {
                 </strong>{' '}
                 products in stock
               </div>
+              <div className="mt-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => setLocationWarehouse(w.id)}
+                >
+                  Locations (
+                  {state.locations.filter((l) => l.warehouseId === w.id).length}
+                  )
+                </Button>
+              </div>
             </article>
           ))}
         </div>
@@ -181,7 +198,10 @@ export default function WarehousesPage() {
                 : "Add your first warehouse or storage location. You'll be ready to receive, transfer, and track stock."
             }
           >
-            <Button onClick={query ? clearSearch : () => setEditor({})}>
+            <Button
+              disabled={!query && !canManage}
+              onClick={query ? clearSearch : () => setEditor({})}
+            >
               <Plus size={17} />
               {query ? 'Clear search' : 'Create your first warehouse'}
             </Button>
@@ -192,6 +212,12 @@ export default function WarehousesPage() {
         <WarehouseForm
           warehouse={editor.id ? editor : null}
           onClose={() => setEditor(null)}
+        />
+      )}
+      {locationWarehouse && (
+        <LocationsDialog
+          warehouseId={locationWarehouse}
+          onClose={() => setLocationWarehouse(null)}
         />
       )}
     </>

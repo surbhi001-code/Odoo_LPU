@@ -1,5 +1,6 @@
 const { sequelize, Document, DocumentLine, Product, Location, Inventory } = require('../../database/models');
 const stockService = require('../stock/stock.service');
+const { assertDocumentInput } = require('./operation.validation');
 
 const REFERENCE_PREFIX = {
     RECEIPT: 'REC',
@@ -14,8 +15,20 @@ const generateReferenceNo = async (type, transaction) => {
     return `${REFERENCE_PREFIX[type]}-${nextNumber}`;
 };
 
+const checkReferences = async (data, transaction) => {
+    for (const line of data.lines) {
+        const product = await Product.findByPk(line.product_id, { transaction });
+        if (!product || !product.is_active) throw Object.assign(new Error('A selected product no longer exists or is inactive'), { statusCode: 400 });
+    }
+    for (const id of [data.source_location_id, data.destination_location_id].filter(Boolean)) {
+        if (!await Location.findByPk(id, { transaction })) throw Object.assign(new Error('A selected location no longer exists'), { statusCode: 400 });
+    }
+};
+
 const createDocument = async (data, userId) => {
     return sequelize.transaction(async (transaction) => {
+        assertDocumentInput(data);
+        await checkReferences(data, transaction);
         const reference_no = await generateReferenceNo(data.type, transaction);
 
         const document = await Document.create({
@@ -25,6 +38,7 @@ const createDocument = async (data, userId) => {
             source_location_id: data.source_location_id || null,
             destination_location_id: data.destination_location_id || null,
             partner_name: data.partner_name || null,
+            notes: data.notes || null,
             scheduled_date: data.scheduled_date || null,
             created_by: userId
         }, { transaction });
@@ -109,55 +123,42 @@ const getDocumentById = async (id) => {
     return document;
 };
 
-const updateDocument = async (id, data) => {
-    const document = await Document.findByPk(id);
-    if (!document) {
-        const err = new Error('Document not found');
-        err.statusCode = 404;
-        throw err;
-    }
-
-    if (document.status === 'DONE' || document.status === 'CANCELED') {
-        const err = new Error(`Cannot edit a document that is already ${document.status}`);
-        err.statusCode = 400;
-        throw err;
-    }
-
-    const allowedFields = ['partner_name', 'scheduled_date', 'status', 'source_location_id', 'destination_location_id'];
+const updateDocument = async (id, data) => sequelize.transaction(async (transaction) => {
+    const document = await Document.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
+    if (!document) throw Object.assign(new Error('Document not found'), { statusCode: 404 });
+    if (['DONE', 'CANCELED'].includes(document.status)) throw Object.assign(new Error('Completed or canceled operations cannot be edited'), { statusCode: 400 });
+    if (data.status !== undefined && !['DRAFT', 'WAITING', 'READY'].includes(data.status)) throw Object.assign(new Error('Use validate or cancel to complete an operation'), { statusCode: 400 });
+    const lines = data.lines === undefined ? await DocumentLine.findAll({ where: { document_id: id }, transaction }) : data.lines;
+    const merged = { ...document.get({ plain: true }), ...data, type: document.type, lines };
+    assertDocumentInput(merged);
+    if (data.lines !== undefined || data.source_location_id !== undefined || data.destination_location_id !== undefined) await checkReferences(merged, transaction);
     const updates = {};
-    allowedFields.forEach((field) => {
+    for (const field of ['partner_name', 'scheduled_date', 'notes', 'status', 'source_location_id', 'destination_location_id']) {
         if (data[field] !== undefined) updates[field] = data[field];
-    });
-
-    await document.update(updates);
-    return document;
-};
-
-const cancelDocument = async (id) => {
-    const document = await Document.findByPk(id);
-    if (!document) {
-        const err = new Error('Document not found');
-        err.statusCode = 404;
-        throw err;
     }
-    if (document.status === 'DONE') {
-        const err = new Error('Cannot cancel a document that is already validated (DONE)');
-        err.statusCode = 400;
-        throw err;
+    // Changed quantities/locations must be reviewed again before validation.
+    if (data.lines !== undefined || ['source_location_id', 'destination_location_id'].some(field => data[field] !== undefined && Number(data[field]) !== Number(document[field]))) updates.status = 'DRAFT';
+    await document.update(updates, { transaction });
+    if (data.lines !== undefined) {
+        await DocumentLine.destroy({ where: { document_id: id }, transaction });
+        await DocumentLine.bulkCreate(data.lines.map(line => ({ document_id: id, product_id: Number(line.product_id), quantity: Number(line.quantity) })), { transaction });
     }
-
-    document.status = 'CANCELED';
-    await document.save();
     return document;
-};
+});
+
+const cancelDocument = async (id) => sequelize.transaction(async (transaction) => {
+    const document = await Document.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
+    if (!document) throw Object.assign(new Error('Document not found'), { statusCode: 404 });
+    if (document.status === 'DONE') throw Object.assign(new Error('A validated operation cannot be canceled'), { statusCode: 400 });
+    await document.update({ status: 'CANCELED' }, { transaction });
+    return document;
+});
 
 // The core action: validating a document actually moves stock.
 const validateDocument = async (id, userId) => {
     return sequelize.transaction(async (transaction) => {
-        const document = await Document.findByPk(id, {
-            include: [{ model: DocumentLine, as: 'lines' }],
-            transaction
-        });
+        const document = await Document.findByPk(id, { transaction, lock: transaction.LOCK.UPDATE });
+        if (document) document.lines = await DocumentLine.findAll({ where: { document_id: id }, transaction });
 
         if (!document) {
             const err = new Error('Document not found');

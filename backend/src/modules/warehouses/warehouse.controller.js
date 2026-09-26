@@ -72,7 +72,15 @@ const deleteLocation = async (req, res, next) => {
     }
 };
 
+const updateLocation = async (req, res, next) => {
+    try {
+        const location = await warehouseService.updateLocation(req.params.locationId, req.body);
+        res.json({ success: true, data: location });
+    } catch (err) { next(err); }
+};
+
 module.exports = {
+    updateLocation,
     createWarehouse,
     getAllWarehouses,
     getWarehouseById,

@@ -25,6 +25,9 @@ import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import Badge from "../../components/ui/Badge";
+import useDashboard from "./useDashboard";
+import DashboardOperation from "./DashboardOperation";
+import { endSession } from "../auth/session";
 import { useWorkspace } from "../../lib/workspaceContext";
 import {
   operationTypes,
@@ -34,10 +37,7 @@ import {
   formatDate,
 } from "../../lib/inventory";
 import OperationsTable from "../operations/components/OperationsTable";
-import OperationForm from "../operations/components/OperationForm";
-import OperationDetails from "../operations/components/OperationDetails";
 export default function DashboardPage() {
-  const { state } = useWorkspace();
   const [createType, setCreateType] = useState("");
   const [selected, setSelected] = useState(null);
   const [filters, setFilters] = useState({
@@ -46,23 +46,52 @@ export default function DashboardPage() {
     warehouse: "",
     category: "",
   });
-  const pending = (type) =>
-    state.operations.filter(
-      (o) => o.type === type && !["Done", "Canceled"].includes(o.status),
-    ).length;
-  const attention = state.products.filter((p) => stockStatus(p) !== "In stock");
+  const [page, setPage] = useState(1);
+  const { overview, documents, reload } = useDashboard(filters, page);
+  const { reload: reloadWorkspace } = useWorkspace();
+  const refresh = () => { reload(); reloadWorkspace(); };
+  if (overview.error?.status === 401 || documents.error?.status === 401)
+    return (
+      <div
+        role="alert"
+        className="space-y-4 rounded-xl border border-[#dce5df] bg-white p-8"
+      >
+        <h2>Please sign in again</h2>
+        <p>Your session has expired or is no longer valid.</p>
+        <Button onClick={endSession}>Sign in</Button>
+      </div>
+    );
+  if (overview.loading)
+    return (
+      <p role="status" className="py-16 text-center text-sm">
+        Loading dashboard...
+      </p>
+    );
+  if (overview.error)
+    return (
+      <div role="alert" className="space-y-4 p-8">
+        <p>{overview.error.message}</p>
+        <Button onClick={reload}>Try again</Button>
+      </div>
+    );
+  const { kpis, attention, warehouses, categories, movements, hasReceipt } =
+    overview.data;
+  const state = { warehouses, movements };
+  const rows = documents.data?.rows || [];
+  const total = documents.data?.total || 0;
+  const totalPages = documents.data?.totalPages || 0;
   const metrics = [
     [
-      "Products in stock",
-      state.products.filter((p) => totalStock(p) > 0).length,
+      "Total products",
+      kpis.totalProducts,
       Package,
       "green",
-      `${state.products.length} products in your catalog`,
+      "Active products in your catalog",
       "/products",
     ],
     [
       "Stock alerts",
-      attention.length,
+      kpis.lowStockCount + kpis.outOfStockCount,
       TriangleAlert,
       "amber",
       "Low stock & out of stock",
@@ -70,7 +99,7 @@ export default function DashboardPage() {
     ],
     [
       "Pending receipts",
-      pending("Receipt"),
+      kpis.pendingReceipts,
       ArrowDownToLine,
       "blue",
       "Incoming stock to receive",
@@ -78,7 +107,7 @@ export default function DashboardPage() {
     ],
     [
       "Pending deliveries",
-      pending("Delivery"),
+      kpis.pendingDeliveries,
       ArrowUpFromLine,
       "purple",
       "Orders awaiting dispatch",
@@ -86,7 +115,7 @@ export default function DashboardPage() {
     ],
     [
       "Scheduled transfers",
-      pending("Transfer"),
+      kpis.transfersScheduled,
       ArrowLeftRight,
       "gray",
       "Moving between locations",
@@ -94,23 +123,12 @@ export default function DashboardPage() {
     ],
   ];
   const filtered = Object.values(filters).some(Boolean);
-  const rows = state.operations.filter(
-    (o) =>
-      (!filters.type || o.type === filters.type) &&
-      (!filters.status || o.status === filters.status) &&
-      (!filters.warehouse ||
-        o.warehouseId === filters.warehouse ||
-        o.destinationId === filters.warehouse) &&
-      (!filters.category ||
-        o.lines.some(
-          (line) =>
-            state.products.find((p) => p.id === line.productId)?.category ===
-            filters.category,
-        )),
-  );
   const filter = (key) => ({
     value: filters[key],
-    onChange: (e) => setFilters({ ...filters, [key]: e.target.value }),
+    onChange: (e) => {
+      setPage(1);
+      setFilters({ ...filters, [key]: e.target.value });
+    },
   });
   const steps = [
     {
@@ -123,16 +141,14 @@ export default function DashboardPage() {
     {
       title: "Add your products",
       text: "Build your product catalog",
-      done: state.products.length > 0,
+      done: kpis.totalProducts > 0,
       to: "/products",
       icon: Package,
     },
     {
       title: "Receive your first stock",
       text: "Bring your workspace to life",
-      done: state.operations.some(
-        (o) => o.type === "Receipt" && o.status === "Done",
-      ),
+      done: hasReceipt,
       to: "/operations/receipts",
       icon: ArrowDownToLine,
     },
@@ -140,9 +156,10 @@ export default function DashboardPage() {
   const completed = steps.filter((s) => s.done).length;
   return (
     <>
-      <PageHeader
-        title="Inventory overview"
-      >
+      <PageHeader title="Inventory overview">
+        <Button variant="secondary" onClick={refresh}>
+          Refresh
+        </Button>
         <Button onClick={() => setCreateType("Receipt")}>
           <Plus size={17} />
           New operation
@@ -251,7 +268,7 @@ export default function DashboardPage() {
             <h2>
               Operations overview{" "}
               <span className="font-sans inline-flex items-center justify-center text-[9px] min-w-[21px] h-5 py-0 px-1.5 bg-[#f0f4ef] border border-[#e7eee3] text-[#89997e] rounded-[5px] tracking-[0]">
-                {state.operations.length}
+                {documents.loading ? "..." : total}
               </span>
             </h2>
             <p>Every incoming, outgoing, and in-between.</p>
@@ -288,36 +305,70 @@ export default function DashboardPage() {
           </select>
           <select aria-label="Filter by category" {...filter("category")}>
             <option value="">All categories</option>
-            {[...new Set(state.products.map((p) => p.category))].map((c) => (
-              <option key={c}>{c}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
           {filtered && (
             <button
               className="text-link bg-transparent border-0 border-transparent p-0 inline-flex items-center gap-1.5 text-[#648853] text-[10px] font-[550] hover:text-[#254f2d] hover:underline"
-              onClick={() =>
+              onClick={() => {
+                setPage(1);
                 setFilters({
                   type: "",
                   status: "",
                   warehouse: "",
                   category: "",
-                })
-              }
+                });
+              }}
             >
               Clear
             </button>
           )}
         </div>
-        <OperationsTable
-          rows={rows.slice(0, 8)}
-          state={state}
-          onSelect={setSelected}
-          filtered={filtered}
-          onCreate={() => setCreateType("Receipt")}
-        />
+        {documents.loading ? (
+          <p role="status" className="p-8 text-center text-sm">
+            Loading operations...
+          </p>
+        ) : documents.error ? (
+          <div role="alert" className="space-y-3 p-6">
+            <p>{documents.error.message}</p>
+            <Button onClick={reload}>Try again</Button>
+          </div>
+        ) : (
+          <OperationsTable
+            rows={rows}
+            state={state}
+            onSelect={setSelected}
+            filtered={filtered}
+            onCreate={() => setCreateType("Receipt")}
+          />
+        )}
         <div className="py-3 px-[21px] border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#a0ab98] [&>span]:text-[8px] [&>span]:text-[#a8b19f] max-[520px]:py-3 max-[520px]:px-[15px] max-[520px]:[&>span]:hidden">
-          Showing {Math.min(rows.length, 8)} of {rows.length} operations
-          <span>All your stock activity, in one place</span>
+          Showing {rows.length} of {total} operations
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              disabled={documents.loading || !!documents.error || page <= 1}
+              onClick={() => setPage((value) => value - 1)}
+            >
+              Previous
+            </Button>
+            <span>
+              Page {page} of {Math.max(1, totalPages)}
+            </span>
+            <Button
+              variant="secondary"
+              disabled={
+                documents.loading || !!documents.error || page >= totalPages
+              }
+              onClick={() => setPage((value) => value + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </section>
       <div className="grid grid-cols-2 gap-[19px] mt-[21px] [&_.panel-heading]:pt-4.5 [&_.panel-heading]:px-5 [&_.panel-heading]:pb-3 [&_.text-link]:text-[9px] max-[1050px]:gap-3.5 max-[1050px]:[&_.panel-heading]:flex-wrap max-[520px]:grid-cols-1 max-[520px]:gap-4">
@@ -363,12 +414,12 @@ export default function DashboardPage() {
               compact
               icon={Package}
               title={
-                state.products.length
+                kpis.totalProducts
                   ? "Your stock is in good shape"
                   : "Stay a step ahead of low stock"
               }
               description={
-                state.products.length
+                kpis.totalProducts
                   ? "All products are above their reorder levels."
                   : "Add products and reorder levels to see stock alerts here."
               }
@@ -397,9 +448,7 @@ export default function DashboardPage() {
                     <ArrowLeftRight size={16} />
                   </span>
                   <span>
-                    <strong>
-                      {state.products.find((p) => p.id === m.productId)?.name}
-                    </strong>
+                    <strong>{m.productName}</strong>
                     <small>
                       {m.reference} · {formatDate(m.createdAt)}
                     </small>
@@ -422,13 +471,21 @@ export default function DashboardPage() {
         </section>
       </div>
       {createType && (
-        <OperationForm
+        <DashboardOperation
+          warehouses={warehouses}
+          onChanged={refresh}
           initialType={createType}
           onClose={() => setCreateType("")}
         />
       )}
       {selected && (
-        <OperationDetails id={selected} onClose={() => setSelected(null)} />
+        <DashboardOperation
+          key={selected}
+          id={selected}
+          warehouses={warehouses}
+          onChanged={refresh}
+          onClose={() => setSelected(null)}
+        />
       )}
     </>
   );

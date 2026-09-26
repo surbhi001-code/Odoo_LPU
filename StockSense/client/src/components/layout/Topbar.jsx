@@ -11,6 +11,7 @@ import {
 import { useWorkspace } from '../../lib/workspaceContext'
 import { formatDate, stockStatus } from '../../lib/inventory'
 import { endSession, useSession } from '../../features/auth/session'
+import { roleLabels } from '../../features/auth/roles'
 
 const iconButton =
   'flex size-9 items-center justify-center rounded-lg text-[#829288] transition hover:bg-[#f0f5ee] hover:text-[#31583e]'
@@ -139,6 +140,9 @@ export default function Topbar({ onMenu, menuOpen }) {
               </p>
               <p className="mt-1 truncate text-[11px] text-[#8a9981]">
                 {session?.email}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold text-[#527740]">
+                {roleLabels[session?.role]}
               </p>
             </div>
             <div

@@ -21,5 +21,6 @@ router.delete('/:id', restrictTo('admin', 'inventory_manager'), warehouseControl
 router.get('/:id/locations', warehouseController.getLocationsByWarehouse);
 router.post('/:id/locations', restrictTo('admin', 'inventory_manager'), validateCreateLocation, warehouseController.createLocation);
 router.delete('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.deleteLocation);
+router.patch('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.updateLocation);
 
 module.exports = router;

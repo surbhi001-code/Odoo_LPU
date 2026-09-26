@@ -35,12 +35,11 @@ export function useSession() {
   }, [snapshot])
 }
 
-export function startSession({ email, name, id, role, token }) {
+export function startSession({ email, name, id, role }) {
   const session = {
     mode: 'api',
     id,
     role,
-    token,
     email: email.trim(),
     name: name?.trim() || email.trim().split('@')[0],
   }
@@ -54,6 +53,10 @@ export function startSession({ email, name, id, role, token }) {
 
 export function endSession() {
   logoutRequest().catch(() => {})
+  clearSession()
+}
+
+export function clearSession() {
   sessionStorage.removeItem(sessionKey)
   window.dispatchEvent(new Event(sessionEvent))
 }
