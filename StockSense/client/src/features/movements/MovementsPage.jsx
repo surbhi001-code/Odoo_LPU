@@ -25,13 +25,45 @@ export default function MovementsPage() {
         (!type || m.type === type) &&
         (!warehouse || m.warehouseId === warehouse),
     )
-  function exportJson() {
+  function exportExcel() {
+    const escape = (value) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+    const cell = (value, number = false) =>
+      `<Cell><Data ss:Type="${number ? 'Number' : 'String'}">${escape(value)}</Data></Cell>`
+    const header = [
+      'Date',
+      'Reference',
+      'Product',
+      'SKU',
+      'Type',
+      'Warehouse',
+      'Location',
+      'Balance after',
+      'Stock change',
+      'Unit',
+    ]
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Worksheet ss:Name="Move history"><Table>
+<Row>${header.map((label) => cell(label)).join('')}</Row>
+${rows
+  .map(
+    (m) =>
+      `<Row>${cell(formatDate(m.createdAt))}${cell(m.reference)}${cell(m.product?.name)}${cell(m.product?.sku)}${cell(m.type)}${cell(m.warehouseName)}${cell(m.locationName)}${cell(m.balance, true)}${cell(m.quantity, true)}${cell(m.product?.unit)}</Row>`,
+  )
+  .join('')}
+</Table></Worksheet></Workbook>`
     const url = URL.createObjectURL(
-      new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' }),
+      new Blob([xml], { type: 'application/vnd.ms-excel' }),
     )
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = 'stocksense-movements.json'
+    anchor.download = 'stocksense-movements.xls'
     anchor.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
@@ -40,11 +72,11 @@ export default function MovementsPage() {
       <PageHeader title="Move history">
         <Button
           variant="secondary"
-          onClick={exportJson}
+          onClick={exportExcel}
           disabled={!rows.length}
         >
           <Download size={16} />
-          Export JSON
+          Export Excel
         </Button>
       </PageHeader>
       <section className="overflow-hidden rounded-xl border border-[#dfe7e2] bg-white shadow-[0_3px_10px_#153a2508]">
