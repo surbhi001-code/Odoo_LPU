@@ -289,6 +289,7 @@ If SMTP is not set, forgot-password still saves an OTP and logs it in the backen
 | Command | Description |
 | --- | --- |
 | `npm run dev` | Dev server with file watch |
+| `npm run seed` | Load NourishCart sample inventory (skips if already present) |
 | `npm start` | Run `src/server.js` |
 | `node scripts/set-user-role.js --email person@example.com --role admin` | Promote an existing user |
 | `node scripts/migrate-document-notes.js` | Add `documents.notes` if missing |

@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { sequelize, Document, DocumentLine, Product, Location, Inventory } = require('../../database/models');
 const stockService = require('../stock/stock.service');
 const { assertDocumentInput } = require('./operation.validation');
@@ -57,10 +58,16 @@ const createDocument = async (data, userId) => {
     });
 };
 
-const getAllDocuments = async ({ type, status, warehouse_id, category_id, page = 1, limit = 20 }) => {
+const getAllDocuments = async ({ type, status, warehouse_id, category_id, location_id, page = 1, limit = 20 }) => {
     const where = {};
     if (type) where.type = type;
     if (status) where.status = status;
+    if (location_id) {
+        where[Op.or] = [
+            { source_location_id: location_id },
+            { destination_location_id: location_id },
+        ];
+    }
 
     const locationWhere = warehouse_id ? { warehouse_id } : undefined;
 

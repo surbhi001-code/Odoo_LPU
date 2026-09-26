@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { LogOut, X } from 'lucide-react'
+import { LogOut, UserRound, X } from 'lucide-react'
 import { navigationGroups } from './navigation'
 import { endSession } from '../../features/auth/session'
 
@@ -15,7 +15,7 @@ export default function Sidebar({ open, onClose }) {
       )}
       <aside
         id="sidebar-navigation"
-        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-y-auto bg-[#143b32] px-[17px] pt-7 pb-5 text-[#d8e5df] max-[1250px]:w-[215px] max-[1250px]:px-[13px] max-[800px]:w-60 max-[800px]:transition-[translate,visibility] max-[800px]:duration-200 ${open ? 'max-[800px]:visible max-[800px]:translate-x-0' : 'max-[800px]:invisible max-[800px]:-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-hidden bg-[#143b32] px-[17px] pt-7 pb-5 text-[#d8e5df] max-[1250px]:w-[215px] max-[1250px]:px-[13px] max-[800px]:w-60 max-[800px]:transition-[translate,visibility] max-[800px]:duration-200 ${open ? 'max-[800px]:visible max-[800px]:translate-x-0' : 'max-[800px]:invisible max-[800px]:-translate-x-full'}`}
       >
         <Link
           to="/"
@@ -63,18 +63,30 @@ export default function Sidebar({ open, onClose }) {
             </div>
           ))}
         </nav>
-        <button
-          type="button"
-          onClick={() => {
-            onClose()
-            endSession()
-            navigate('/auth/login', { replace: true })
-          }}
-          className="mt-auto flex min-h-[42px] items-center gap-3 rounded-lg px-[13px] py-2.5 text-xs font-normal text-[#c9b4a4] transition hover:bg-[#3d322c] hover:text-white"
-        >
-          <LogOut size={18} strokeWidth={1.7} />
-          Log out
-        </button>
+        <div className="mt-auto space-y-1">
+          <NavLink
+            to="/profile"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `flex min-h-[42px] items-center gap-3 rounded-lg px-[13px] py-2.5 text-xs transition ${isActive ? 'bg-[#c6ee8a] font-semibold text-[#25442e] shadow-[0_3px_9px_#0d2c3120]' : 'font-normal text-[#b2c7bc] hover:bg-[#254b3f] hover:text-white'}`
+            }
+          >
+            <UserRound size={18} strokeWidth={1.7} />
+            My profile
+          </NavLink>
+          <button
+            type="button"
+            onClick={() => {
+              onClose()
+              endSession()
+              navigate('/auth/login', { replace: true })
+            }}
+            className="flex min-h-[42px] w-full items-center gap-3 rounded-lg px-[13px] py-2.5 text-xs font-normal text-[#c9b4a4] transition hover:bg-[#3d322c] hover:text-white"
+          >
+            <LogOut size={18} strokeWidth={1.7} />
+            Log out
+          </button>
+        </div>
       </aside>
     </>
   )

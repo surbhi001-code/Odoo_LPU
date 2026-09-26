@@ -5,10 +5,14 @@ const routes = require('./routes');
 const app = express();
 
 // core middleware
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true
-}));
+const corsOptions = {
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+app.options('/{*path}', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -28,6 +32,11 @@ app.use((req, res) => {
 // centralized error handler — always last
 app.use((err, req, res, next) => {
     console.error(err.stack);
+    const origin = req.headers.origin;
+    if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
     res.status(err.statusCode || 500).json({
         success: false,
         message: err.message || 'Internal Server Error'

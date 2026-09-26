@@ -8,22 +8,20 @@ export default function Providers({ children }) {
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
   const session = useSession()
-  const activeRequest = useRef(null)
+  const loadVersion = useRef(0)
   const [loadedFor, setLoadedFor] = useState(null)
   const reload = useCallback(async () => {
-    activeRequest.current?.abort()
-    const controller = new AbortController()
-    activeRequest.current = controller
     if (!session) return
+    const version = ++loadVersion.current
     setError('')
     try {
-      const next = await apiClient.getWorkspace(controller.signal)
-      if (controller.signal.aborted) return
+      const next = await apiClient.getWorkspace()
+      if (version !== loadVersion.current) return
       setState(next)
       setLoadedFor(session)
       return next
     } catch (err) {
-      if (controller.signal.aborted) return
+      if (version !== loadVersion.current) return
       setError(
         err.status === 401
           ? 'Your session has expired. Please sign in again.'
@@ -34,7 +32,6 @@ export default function Providers({ children }) {
   }, [session])
   useEffect(() => {
     reload()
-    return () => activeRequest.current?.abort()
   }, [reload])
   useEffect(() => {
     if (!toast) return

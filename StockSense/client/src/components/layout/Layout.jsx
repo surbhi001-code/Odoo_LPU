@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import Sidebar from './Sidebar'
@@ -11,9 +11,6 @@ export default function Layout() {
   const { state, error, reload } = useWorkspace()
   const { pathname } = useLocation()
   const isDashboard = pathname === '/'
-  useEffect(() => {
-    reload()
-  }, [pathname, reload])
   return (
     <div className="min-h-screen">
       <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />

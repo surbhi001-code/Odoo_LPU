@@ -94,14 +94,14 @@ const deleteLocation = async (locationId) => {
         throw err;
     }
 
-    // block delete if it still holds stock — check inventory, not just existence
-    const stockCount = await Inventory.count({ where: { location_id: locationId } });
-    if (stockCount > 0) {
-        const err = new Error('Cannot delete a location that still holds inventory');
+    const onHand = Number(await Inventory.sum('quantity', { where: { location_id: locationId } })) || 0;
+    if (onHand > 0) {
+        const err = new Error('Move or adjust stock to zero at this location before deleting it');
         err.statusCode = 400;
         throw err;
     }
 
+    await Inventory.destroy({ where: { location_id: locationId } });
     await location.destroy();
     return true;
 };
