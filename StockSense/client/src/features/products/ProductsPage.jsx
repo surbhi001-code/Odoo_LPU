@@ -13,7 +13,8 @@ import ProductForm from './ProductForm'
 export default function ProductsPage() {
   const { state } = useWorkspace()
   const [params, setParams] = useSearchParams()
-  const [category, setCategory] = useState('')
+  const category = params.get('category') || ''
+  const setCategory = (value) => setParam('category', value)
   const [editor, setEditor] = useState(null)
   const [locations, setLocations] = useState(null)
   const query = params.get('q') || ''
@@ -197,10 +198,7 @@ export default function ProductsPage() {
               {filtered ? (
                 <Button
                   variant="secondary"
-                  onClick={() => {
-                    setParams({})
-                    setCategory('')
-                  }}
+                  onClick={() => setParams({})}
                 >
                   Clear filters
                 </Button>

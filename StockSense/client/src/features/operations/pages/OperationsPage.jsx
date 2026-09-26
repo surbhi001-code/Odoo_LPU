@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, Search } from 'lucide-react'
 import PageHeader from '../../../components/layout/PageHeader'
 import Button from '../../../components/ui/Button'
@@ -27,11 +28,25 @@ const descriptions = {
 }
 export default function OperationsPage({ type }) {
   const { state } = useWorkspace()
+  const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('')
   const [warehouse, setWarehouse] = useState('')
   const [create, setCreate] = useState(false)
   const [selected, setSelected] = useState(null)
+  const activeOperation =
+    state.operations.find(
+      (operation) =>
+        operation.id === params.get('operation') && operation.type === type,
+    )?.id || selected
+  function closeOperation() {
+    setSelected(null)
+    if (params.has('operation')) {
+      const next = new URLSearchParams(params)
+      next.delete('operation')
+      setParams(next, { replace: true })
+    }
+  }
   const all = state.operations.filter((o) => o.type === type)
   const rows = all.filter(
     (o) =>
@@ -111,8 +126,8 @@ export default function OperationsPage({ type }) {
       {create && (
         <OperationForm initialType={type} onClose={() => setCreate(false)} />
       )}
-      {selected && (
-        <OperationDetails id={selected} onClose={() => setSelected(null)} />
+      {activeOperation && (
+        <OperationDetails id={activeOperation} onClose={closeOperation} />
       )}
     </>
   )
