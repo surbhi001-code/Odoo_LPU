@@ -6,11 +6,16 @@ import OperationsPage from '../features/operations/pages/OperationsPage'
 import WarehousesPage from '../features/warehouses/WarehousesPage'
 import MovementsPage from '../features/movements/MovementsPage'
 import AuthPage from '../features/auth/AuthPage'
+import AuthGuard from '../features/auth/AuthGuard'
 import ProfilePage from '../features/auth/ProfilePage'
 import EmptyState from '../components/ui/EmptyState'
 export const router = createBrowserRouter([
   {
-    element: <Layout />,
+    element: (
+      <AuthGuard>
+        <Layout />
+      </AuthGuard>
+    ),
     errorElement: (
       <div className="py-22.5 px-6 text-center text-[#819576] flex items-center flex-col gap-4.5 [&_p]:text-[13px] [&_p]:max-w-137.5 [&_p]:leading-[1.8]">
         <h1>Something went wrong</h1>

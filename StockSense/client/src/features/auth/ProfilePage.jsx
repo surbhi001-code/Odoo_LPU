@@ -1,10 +1,13 @@
-import { Link } from 'react-router-dom'
-import { UserRound, Download, LogIn } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { UserRound, Download, LogOut } from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 import { useWorkspace } from '../../lib/workspaceContext'
+import { endSession, useSession } from './session'
 export default function ProfilePage() {
   const { state } = useWorkspace()
+  const session = useSession()
+  const navigate = useNavigate()
   function exportWorkspace() {
     const url = URL.createObjectURL(
       new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }),
@@ -28,14 +31,14 @@ export default function ProfilePage() {
             <UserRound size={32} />
           </span>
           <div>
-            <h2>Local workspace</h2>
-            <p>You’re exploring the frontend preview.</p>
+            <h2>{session.name}</h2>
+            <p>{session.email}</p>
           </div>
         </div>
         <div className="info-box py-[13px] px-[15px] bg-[#f6f9f1] border border-[#e5eddc] text-[#82916f] rounded-[7px] text-[11px] leading-[1.8] mt-5 [&_a]:underline [&_a]:text-[#517a3d]">
-          Account creation, sign-in, password reset, and logout will be
-          connected with the backend. There is no authenticated session in this
-          preview.
+          This is a local frontend session. Your password is not stored or
+          verified. Account authentication and password reset will be connected
+          with the backend.
         </div>
         <div className="border-t border-t-[#e7ece9] pt-[23px] mt-[23px] [&_p]:text-[12px] [&_p]:text-[#93a080] [&_p]:leading-[1.9] [&_p]:mt-[9px] [&_p]:mx-0 [&_p]:mb-[17px]">
           <h3>Your workspace data</h3>
@@ -49,18 +52,22 @@ export default function ProfilePage() {
           </Button>
         </div>
         <div className="border-t border-t-[#e7ece9] pt-[23px] mt-[23px] [&_p]:text-[12px] [&_p]:text-[#93a080] [&_p]:leading-[1.9] [&_p]:mt-[9px] [&_p]:mx-0 [&_p]:mb-[17px]">
-          <h3>Account screens</h3>
+          <h3>Your session</h3>
           <p>
-            Explore the sign-in, registration, and OTP password reset
-            interfaces.
+            Sign out to return to the login screen. Your inventory data stays
+            saved in this browser.
           </p>
-          <Link
-            to="/auth/login"
+          <button
+            type="button"
+            onClick={() => {
+              endSession()
+              navigate('/auth/login', { replace: true })
+            }}
             className="button border border-[#286047] rounded-[6px] min-h-[37px] py-[9px] px-[15px] inline-flex items-center justify-center gap-2 text-[11px] font-semibold leading-[1.4] whitespace-nowrap transition duration-150 active:translate-y-px bg-[#286047] text-white shadow-[0_2px_3px_#26492d0c] hover:bg-[#184b35]"
           >
-            <LogIn size={16} />
-            Open sign-in screen
-          </Link>
+            <LogOut size={16} />
+            Sign out of workspace
+          </button>
         </div>
       </section>
     </>

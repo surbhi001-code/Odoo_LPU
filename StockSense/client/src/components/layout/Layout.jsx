@@ -1,18 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import GlobalSearch from './GlobalSearch'
 import Button from '../ui/Button'
 import { useWorkspace } from '../../lib/workspaceContext'
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const { state, error, reload } = useWorkspace()
+  useEffect(() => {
+    function searchShortcut(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        if (document.querySelector('dialog[open]') && !searchOpen) return
+        event.preventDefault()
+        setMenuOpen(false)
+        setSearchOpen((value) => !value)
+      }
+    }
+    document.addEventListener('keydown', searchShortcut)
+    return () => document.removeEventListener('keydown', searchShortcut)
+  }, [searchOpen])
   return (
     <div className="min-h-screen">
-      <Sidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <Sidebar
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSearch={() => setSearchOpen(true)}
+      />
       <div className="ml-60 min-h-screen flex flex-col max-[1250px]:ml-[215px] max-[800px]:ml-0">
-        <Topbar onMenu={() => setMenuOpen(true)} />
+        <Topbar onMenu={() => setMenuOpen(true)} menuOpen={menuOpen} />
         <main
           id="main-content"
           className="pt-[31px] px-8.5 pb-5.5 flex-1 w-full max-w-425 m-auto min-[1600px]:pt-10 max-[1250px]:pt-[27px] max-[1250px]:px-6 max-[1250px]:pb-5.5 max-[800px]:py-[25px] max-[800px]:px-5 max-[520px]:py-6 max-[520px]:px-[15px]"
@@ -46,6 +64,7 @@ export default function Layout() {
           <span>Inventory management, simplified.</span>
         </footer>
       </div>
+      {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
     </div>
   )
 }

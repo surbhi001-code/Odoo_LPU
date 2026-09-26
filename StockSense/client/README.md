@@ -6,7 +6,9 @@ Inventory management frontend built with React, React Router, Vite, Tailwind CSS
 
 Component styling lives in JSX as Tailwind utility classes, including responsive, hover, focus, dialog-backdrop, and state styles. `src/styles/index.css` contains only the Tailwind import, the Inter font theme, and shared HTML element defaults; there are no custom component CSS rules. Shared controls use complete literal utility variants so Tailwind can discover them at build time.
 
-Use **Sign in** in the workspace topbar or open `/auth/login`. Sign-up and OTP reset screens are linked from there. Password visibility toggles and native form validation work locally. Authentication itself remains disconnected until the backend is implemented.
+The workspace opens at `/auth/login` until the login or sign-up form is submitted. Direct workspace URLs also redirect to login and preserve the destination. Login uses a viewport-height Tailwind layout: no document scrolling, with an internal form scroll area only when a short screen, keyboard, or zoom needs extra space. Sign-up and OTP reset screens are linked from login.
+
+This is a **frontend-only navigation gate**, not real authentication. Any syntactically valid email and password of at least eight characters after trimming can open a UI session; sign-up also requires a name. Only name/email and a preview marker are saved to `sessionStorage` (`stocksense.ui-session.v1`), never a password. The session survives refresh in the current tab. Sign out clears the UI session while preserving inventory data. Backend account creation, credential verification, access control, and email delivery remain future work.
 
 ## Run locally
 
@@ -57,8 +59,9 @@ Backend implementation is deferred.
 - Operations: multi-product receipt, delivery, transfer, and physical-count adjustment forms. Draft → Waiting → Ready → Done; unfinished operations may be canceled. Delivery readiness represents picking/packing.
 - Validation updates stock and ledger atomically in the local adapter. Insufficient stock blocks delivery/transfer. Transfers preserve total quantities. Adjustments replace warehouse quantities with physical counts and log differences.
 - Move history: search, type/warehouse filters, JSON export. Profile also exports the entire workspace.
-- Authentication: sign-in, sign-up, and OTP reset interfaces only. They do not authenticate, send email, save passwords, or create sessions. The workspace is directly accessible during frontend development. Logout requires a real session and is deferred.
+- Authentication UI: login/sign-up open a local UI session; workspace routes require that session, and sign-out returns to login. Password visibility and form validation work. OTP screens do not send email or reset passwords yet. This is not server-side authentication or data isolation between accounts.
 - Responsive navigation, native keyboard-accessible dialogs, loading/error states, empty states, and no-result states.
+- Shared search sits in the sidebar above Workspace. Open it from any page or press Ctrl/Cmd+K to find products, operations, warehouses, or navigation pages. Results use the current JSON/API-backed workspace; operation results open the exact document. The topbar contains Help, stock notifications, and a profile menu with My profile and Sign out (plus the navigation button on mobile).
 
 ## JSON data without dummy inventory
 

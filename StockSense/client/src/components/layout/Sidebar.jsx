@@ -1,95 +1,74 @@
 import { NavLink, Link } from 'react-router-dom'
-import {
-  LayoutDashboard,
-  Package,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  ArrowLeftRight,
-  SlidersHorizontal,
-  History,
-  Warehouse,
-  ChevronRight,
-  X,
-  Layers3,
-  UserRound,
-} from 'lucide-react'
-const groups = [
-  {
-    label: 'WORKSPACE',
-    items: [
-      ['/', 'Overview', LayoutDashboard],
-      ['/products', 'Products', Package],
-    ],
-  },
-  {
-    label: 'OPERATIONS',
-    items: [
-      ['/operations/receipts', 'Receipts', ArrowDownToLine],
-      ['/operations/deliveries', 'Delivery orders', ArrowUpFromLine],
-      ['/operations/transfers', 'Internal transfers', ArrowLeftRight],
-      ['/operations/adjustments', 'Stock adjustments', SlidersHorizontal],
-    ],
-  },
-  {
-    label: 'MANAGEMENT',
-    items: [
-      ['/movements', 'Move history', History],
-      ['/warehouses', 'Warehouses', Warehouse],
-    ],
-  },
-]
-export default function Sidebar({ open, onClose }) {
+import { Search, X } from 'lucide-react'
+import { navigationGroups } from './navigation'
+
+export default function Sidebar({ open, onClose, onSearch }) {
   return (
     <>
-      <div
-        className={`hidden max-[800px]:[&.visible]:block max-[800px]:[&.visible]:fixed max-[800px]:[&.visible]:top-0 max-[800px]:[&.visible]:right-0 max-[800px]:[&.visible]:bottom-0 max-[800px]:[&.visible]:left-0 max-[800px]:[&.visible]:bg-[#0f291e88] max-[800px]:[&.visible]:z-39 ${open ? 'visible' : ''}`}
-        onClick={onClose}
-      />
+      {open && (
+        <div
+          className="fixed inset-0 z-39 bg-[#0f291e88] min-[801px]:hidden"
+          onClick={onClose}
+        />
+      )}
       <aside
-        className={`overflow-y-auto w-60 bg-[#143b32] text-[#d8e5df] fixed top-0 right-auto bottom-0 left-0 z-40 flex flex-col pt-[29px] px-[17px] pb-0 max-[1250px]:w-[215px] max-[1250px]:px-[13px] max-[800px]:-translate-x-full max-[800px]:transition-transform max-[800px]:duration-200 max-[800px]:w-60 max-[800px]:[&.open]:translate-x-0 ${open ? 'open' : ''}`}
+        id="sidebar-navigation"
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col overflow-y-auto bg-[#143b32] px-[17px] pt-7 pb-5 text-[#d8e5df] max-[1250px]:w-[215px] max-[1250px]:px-[13px] max-[800px]:w-60 max-[800px]:transition-[translate,visibility] max-[800px]:duration-200 ${open ? 'max-[800px]:visible max-[800px]:translate-x-0' : 'max-[800px]:invisible max-[800px]:-translate-x-full'}`}
       >
         <Link
-          className="brand flex items-center gap-2.5 font-sans text-[23px] font-extrabold tracking-[-0.7px] text-white mt-0 mx-[9px] mb-7.5 [&_img]:w-9 [&_img]:h-9 [&_small]:block [&_small]:font-sans [&_small]:text-[7.8px] [&_small]:font-medium [&_small]:tracking-[2.15px] [&_small]:text-[#a3b9ac] [&_small]:mt-1"
           to="/"
           onClick={onClose}
+          className="mx-2 mb-8 flex items-center gap-2.5 text-[23px] font-extrabold tracking-[-0.7px] text-white"
         >
-          <img src={`${import.meta.env.BASE_URL}stocksense.svg`} alt="" />
+          <img
+            src={`${import.meta.env.BASE_URL}stocksense.svg`}
+            alt=""
+            className="size-9"
+          />
           <span>
             Stock<span className="font-medium">Sense</span>
-            <small>INVENTORY, IN SYNC.</small>
           </span>
         </Link>
         <button
-          className="icon-button border-0 border-transparent hidden items-center justify-center w-[31px] h-[31px] rounded-[6px] bg-transparent text-[#819187] p-0 hover:bg-[#ecf2ed] hover:text-[#225c48] max-[800px]:flex max-[800px]:absolute max-[800px]:right-2.5 max-[800px]:top-[11px] max-[800px]:text-[#aac7ad]"
+          type="button"
           aria-label="Close navigation"
           onClick={onClose}
+          className="absolute top-2 right-2 hidden size-7 items-center justify-center rounded-md text-[#aac7ad] hover:bg-white/10 max-[800px]:flex"
         >
-          <X size={20} />
+          <X size={17} />
         </button>
-        <div className="flex items-center gap-2.5 border border-[#436157] rounded-[8px] py-[13px] px-2.5 text-[11px] text-[#e2eee7] mb-[23px] [&_small]:block [&_small]:text-[#92afa1] [&_small]:text-[10px] [&_small]:mt-[5px]">
-          <span className="bg-[#2c5245] w-7.5 h-8 grid place-items-center rounded-[7px] text-[#d0e2cd]">
-            <Layers3 size={18} />
-          </span>
-          <div>
-            Inventory workspace<small>Your central stock hub</small>
-          </div>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#c6ee8a] ml-auto" />
-        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose()
+            onSearch()
+          }}
+          aria-label="Open global search"
+          aria-keyshortcuts="Control+k Meta+k"
+          className="mb-7 flex min-h-10 items-center gap-2.5 rounded-lg border border-[#426154] bg-[#204538] px-3 text-left text-[#b7cbbd] transition hover:border-[#7b9d72] hover:bg-[#294e3e] focus-visible:outline-[#c6ee8a]"
+        >
+          <Search size={16} strokeWidth={1.7} />
+          <span className="min-w-0 flex-1 truncate text-[11px]">Search anything...</span>
+          <kbd className="rounded border border-[#52705c] px-1 py-0.5 font-sans text-[9px] text-[#92ae9a]">
+            Ctrl K
+          </kbd>
+        </button>
+
         <nav aria-label="Main navigation">
-          {groups.map((group) => (
-            <div
-              className="mb-[25px] [&>p]:text-[9px] [&>p]:tracking-[1.65px] [&>p]:text-[#89a698] [&>p]:mt-0 [&>p]:mx-[13px] [&>p]:mb-2.5 [&>p]:font-semibold"
-              key={group.label}
-            >
-              <p>{group.label}</p>
-              {group.items.map(([path, label, Icon]) => (
+          {navigationGroups.map((group) => (
+            <div key={group.label} className="mb-6">
+              <p className="mx-[13px] mb-2.5 text-[9px] font-semibold tracking-[1.65px] text-[#89a698]">
+                {group.label}
+              </p>
+              {group.items.map(({ to, label, icon: Icon }) => (
                 <NavLink
-                  end={path === '/'}
-                  to={path}
-                  key={path}
+                  key={to}
+                  end={to === '/'}
+                  to={to}
                   onClick={onClose}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 min-h-10.5 py-2.5 px-[13px] rounded-[7px] text-[12px] font-[450] text-[#b2c7bc] mb-1 transition duration-150 hover:bg-[#254b3f] hover:text-white [&.active]:bg-[#c6ee8a] [&.active]:text-[#25442e] [&.active]:font-bold [&.active]:shadow-[0_3px_9px_#0d2c3120] ${isActive ? 'active' : ''}`
+                    `mb-1 flex min-h-[42px] items-center gap-3 rounded-lg px-[13px] py-2.5 text-xs transition ${isActive ? 'bg-[#c6ee8a] font-semibold text-[#25442e] shadow-[0_3px_9px_#0d2c3120]' : 'font-normal text-[#b2c7bc] hover:bg-[#254b3f] hover:text-white'}`
                   }
                 >
                   <Icon size={18} strokeWidth={1.7} />
@@ -99,26 +78,6 @@ export default function Sidebar({ open, onClose }) {
             </div>
           ))}
         </nav>
-        <div className="mt-auto">
-          <div className="border border-[#3c5f50] rounded-[8px] py-3.5 px-[11px] text-[9.5px] text-[#cbdcce] mt-2 mx-0 mb-4.5 [&_small]:block [&_small]:mt-[7px] [&_small]:mr-0 [&_small]:mb-0 [&_small]:ml-3 [&_small]:text-[#8aa999] [&_small]:text-[9px]">
-            <span className="live-dot w-1.5 h-1.5 bg-[#82af70] rounded-full inline-block mr-1.5" />{' '}
-            Built for a clearer stockroom
-            <small>Every product. Every movement.</small>
-          </div>
-          <Link
-            to="/profile"
-            className="flex items-center gap-[11px] border-t border-t-[#365448] py-[19px] px-0.5 text-[12px] font-semibold [&_small]:block [&_small]:mt-[5px] [&_small]:text-[#92ac9d] [&_small]:text-[10px] [&_small]:font-normal [&>svg]:ml-auto [&>svg]:text-[#a2baa9]"
-            onClick={onClose}
-          >
-            <div className="h-8.5 w-8.5 rounded-full bg-[#406151] grid place-items-center text-[#d3e2bd]">
-              <UserRound size={19} />
-            </div>
-            <div>
-              My workspace<small>Local preview</small>
-            </div>
-            <ChevronRight size={16} />
-          </Link>
-        </div>
       </aside>
     </>
   )

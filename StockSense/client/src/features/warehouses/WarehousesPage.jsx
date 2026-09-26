@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, Warehouse, MapPin, Pencil, Package } from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
@@ -85,6 +86,18 @@ function WarehouseForm({ warehouse, onClose }) {
 export default function WarehousesPage() {
   const { state } = useWorkspace()
   const [editor, setEditor] = useState(null)
+  const [params, setParams] = useSearchParams()
+  const query = params.get('q') || ''
+  const warehouses = state.warehouses.filter((warehouse) =>
+    `${warehouse.name} ${warehouse.code} ${warehouse.location}`
+      .toLowerCase()
+      .includes(query.toLowerCase()),
+  )
+  function clearSearch() {
+    const next = new URLSearchParams(params)
+    next.delete('q')
+    setParams(next, { replace: true })
+  }
   return (
     <>
       <PageHeader
@@ -97,20 +110,32 @@ export default function WarehousesPage() {
           Add warehouse
         </Button>
       </PageHeader>
+      {query && (
+        <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-[#e4ebdc] bg-white px-4 py-3 text-xs text-[#7d9270]">
+          <span className="truncate">Search results for “{query}”</span>
+          <button
+            type="button"
+            className="shrink-0 font-medium text-[#527740] hover:underline"
+            onClick={clearSearch}
+          >
+            Clear search
+          </button>
+        </div>
+      )}
       <div className="flex justify-between items-center mb-5 text-[11px] [&_h2]:flex [&_h2]:items-center [&_h2]:gap-[9px] max-[520px]:[&>.muted]:hidden">
         <h2>
           All warehouses{' '}
           <span className="font-sans inline-flex items-center justify-center text-[9px] min-w-[21px] h-5 py-0 px-1.5 bg-[#f0f4ef] border border-[#e7eee3] text-[#89997e] rounded-[5px] tracking-[0]">
-            {state.warehouses.length}
+            {warehouses.length}
           </span>
         </h2>
         <span className="muted text-[#84908b] font-normal">
           Stock availability by location
         </span>
       </div>
-      {state.warehouses.length ? (
+      {warehouses.length ? (
         <div className="grid grid-cols-3 gap-5 max-[1250px]:grid-cols-2 max-[800px]:gap-3.5 max-[520px]:grid-cols-1">
-          {state.warehouses.map((w) => (
+          {warehouses.map((w) => (
             <article
               className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502] p-[23px] [&_.eyebrow]:block [&_h2]:text-[18px] [&_h2]:mb-[11px] [&_p]:flex [&_p]:items-center [&_p]:gap-[7px] [&_p]:text-[11px] [&_p]:text-[#97a188] [&_p]:leading-[1.7]"
               key={w.id}
@@ -149,12 +174,18 @@ export default function WarehousesPage() {
         <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502]">
           <EmptyState
             icon={Warehouse}
-            title="Make room for your inventory"
-            description="Add your first warehouse or storage location. You'll be ready to receive, transfer, and track stock."
+            title={
+              query ? 'No matching warehouses' : 'Make room for your inventory'
+            }
+            description={
+              query
+                ? 'Clear your search to see all warehouse locations.'
+                : "Add your first warehouse or storage location. You'll be ready to receive, transfer, and track stock."
+            }
           >
-            <Button onClick={() => setEditor({})}>
+            <Button onClick={query ? clearSearch : () => setEditor({})}>
               <Plus size={17} />
-              Create your first warehouse
+              {query ? 'Clear search' : 'Create your first warehouse'}
             </Button>
           </EmptyState>
         </section>
