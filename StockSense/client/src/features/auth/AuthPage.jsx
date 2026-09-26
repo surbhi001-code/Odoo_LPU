@@ -13,6 +13,7 @@ import {
   Package,
   UserRound,
 } from 'lucide-react'
+import { forgotPassword, login, resetPassword, signup } from './api'
 import { returnPath, startSession, useSession } from './session'
 
 const content = {
@@ -101,36 +102,78 @@ export default function AuthPage({ mode = 'login' }) {
   const location = useLocation()
   const [notice, setNotice] = useState('')
   const [stage, setStage] = useState('email')
+  const [resetEmail, setResetEmail] = useState('')
   const isResetCode = mode === 'reset' && stage === 'code'
   const copy = content[mode]
 
   if (session) return <Navigate to={returnPath(location)} replace />
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault()
     setNotice('')
-    if (mode === 'reset') {
-      setNotice(
-        'Password reset will be available when email delivery is connected. No code has been sent yet.',
-      )
-      return
-    }
     const data = new FormData(event.currentTarget)
-    const email = String(data.get('email') || '').trim()
+    const email = String(data.get('email') || resetEmail || '').trim()
     const name = String(data.get('name') || '').trim()
     const password = String(data.get('password') || '')
-    if (mode === 'signup' && !name) {
-      setNotice('Please enter your full name.')
-      return
-    }
-    if (!email || password.trim().length < 8) {
-      setNotice(
-        'Please enter your email and a password with at least 8 characters.',
-      )
-      return
-    }
+    const code = String(data.get('code') || '').trim()
+
     try {
-      startSession({ email, name })
+      if (mode === 'reset' && !isResetCode) {
+        if (!email) {
+          setNotice('Please enter your email.')
+          return
+        }
+        const result = await forgotPassword(email)
+        setResetEmail(email)
+        setStage('code')
+        setNotice(result.message || 'OTP sent to your email')
+        return
+      }
+
+      if (mode === 'reset' && isResetCode) {
+        if (!email) {
+          setNotice('Please enter your email first.')
+          return
+        }
+        if (!code || password.trim().length < 8) {
+          setNotice(
+            'Please enter the reset code and a password with at least 8 characters.',
+          )
+          return
+        }
+        const result = await resetPassword({
+          email,
+          otp: code,
+          newPassword: password,
+        })
+        setStage('email')
+        setNotice(result.message || 'Password reset successful')
+        return
+      }
+
+      if (mode === 'signup' && !name) {
+        setNotice('Please enter your full name.')
+        return
+      }
+      if (!email || password.trim().length < 8) {
+        setNotice(
+          'Please enter your email and a password with at least 8 characters.',
+        )
+        return
+      }
+
+      const result =
+        mode === 'signup'
+          ? await signup({ name, email, password })
+          : await login({ email, password })
+      const user = result.data?.user || {}
+      startSession({
+        email: user.email || email,
+        name: user.name || name,
+        id: user.id,
+        role: user.role,
+        token: result.data?.token,
+      })
     } catch (error) {
       setNotice(error.message)
     }

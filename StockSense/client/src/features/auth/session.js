@@ -1,6 +1,6 @@
 import { useMemo, useSyncExternalStore } from 'react'
+import { logout as logoutRequest } from './api'
 
-// Temporary UI session, not authentication. Replace with the backend session API.
 const sessionKey = 'stocksense.ui-session.v1'
 const sessionEvent = 'stocksense:session-change'
 
@@ -26,9 +26,7 @@ export function useSession() {
   return useMemo(() => {
     try {
       const session = JSON.parse(snapshot)
-      return session?.mode === 'frontend' &&
-        typeof session.email === 'string' &&
-        session.email.includes('@')
+      return typeof session?.email === 'string' && session.email.includes('@')
         ? session
         : null
     } catch {
@@ -37,9 +35,12 @@ export function useSession() {
   }, [snapshot])
 }
 
-export function startSession({ email, name }) {
+export function startSession({ email, name, id, role, token }) {
   const session = {
-    mode: 'frontend',
+    mode: 'api',
+    id,
+    role,
+    token,
     email: email.trim(),
     name: name?.trim() || email.trim().split('@')[0],
   }
@@ -52,6 +53,7 @@ export function startSession({ email, name }) {
 }
 
 export function endSession() {
+  logoutRequest().catch(() => {})
   sessionStorage.removeItem(sessionKey)
   window.dispatchEvent(new Event(sessionEvent))
 }
