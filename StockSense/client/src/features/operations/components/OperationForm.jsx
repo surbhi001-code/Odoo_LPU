@@ -7,17 +7,43 @@ import Field from '../../../components/forms/Field'
 import { useWorkspace } from '../../../lib/workspaceContext'
 import { operationTypes, today } from '../../../lib/inventory'
 import { createOperation } from '../api'
-export default function OperationForm({ initialType = 'Receipt', onClose }) {
-  const { state, mutate } = useWorkspace()
-  const [form, setForm] = useState({
-    type: initialType,
-    partner: '',
-    warehouseId: '',
-    destinationId: '',
-    scheduledDate: today(),
-    notes: '',
-    lines: [{ productId: '', quantity: 1 }],
-  })
+export default function OperationForm({
+  initialType = 'Receipt',
+  onClose,
+  workspace,
+  locationMode = false,
+  operation,
+}) {
+  const context = useWorkspace()
+  const { state, mutate } = workspace || context
+  const [form, setForm] = useState(
+    operation
+      ? {
+          id: operation.id,
+          type: operation.type,
+          partner: operation.partner || '',
+          warehouseId:
+            operation.type === 'Receipt'
+              ? operation.destinationLocationId
+              : operation.sourceLocationId,
+          destinationId: operation.destinationLocationId,
+          scheduledDate: operation.scheduledDate || today(),
+          notes: operation.notes || '',
+          lines: operation.lines.map((line) => ({
+            productId: line.productId,
+            quantity: line.quantity,
+          })),
+        }
+      : {
+          type: initialType,
+          partner: '',
+          warehouseId: '',
+          destinationId: '',
+          scheduledDate: today(),
+          notes: '',
+          lines: [{ productId: '', quantity: 1 }],
+        },
+  )
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const field = (key) => ({
@@ -36,10 +62,12 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
     setError('')
     setSaving(true)
     try {
-      await createOperation(mutate, {
+      const payload = {
         ...form,
         lines: form.lines.map((l) => ({ ...l, quantity: Number(l.quantity) })),
-      })
+      }
+      if (operation) await mutate('editOperation', payload)
+      else await createOperation(mutate, payload)
       onClose()
     } catch (err) {
       setError(err.message)
@@ -48,15 +76,21 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
   }
   return (
     <Modal
-      title="New operation"
-      description="Start with a draft. Stock changes only after validation."
+      title={operation ? `Edit ${operation.reference}` : 'New operation'}
+      description={
+        operation
+          ? 'Saving product lines or locations returns the operation to draft for review.'
+          : 'Start with a draft. Stock changes only after validation.'
+      }
       onClose={saving ? () => {} : onClose}
       wide
     >
       {!state.products.length || !state.warehouses.length ? (
         <div className="[&_p]:leading-[1.8] [&_p]:text-[13px] [&_p]:text-[#809271] [&_p]:mb-5.5">
           <p>
-            Add at least one product and warehouse before creating an operation.
+            {locationMode
+              ? 'Add at least one product and warehouse location on the server before creating an operation.'
+              : 'Add at least one product and warehouse before creating an operation.'}
           </p>
           <div className="page-actions flex items-center gap-3.5 flex-wrap">
             <Link
@@ -78,7 +112,11 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
       ) : (
         <form onSubmit={submit}>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 max-[520px]:grid-cols-1">
-            <Field label="Operation type" {...field('type')}>
+            <Field
+              label="Operation type"
+              disabled={Boolean(operation)}
+              {...field('type')}
+            >
               {operationTypes.map((type) => (
                 <option key={type}>{type}</option>
               ))}
@@ -101,12 +139,20 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
             )}
             <Field
               label={
-                form.type === 'Transfer' ? 'Source warehouse' : 'Warehouse'
+                locationMode
+                  ? form.type === 'Transfer'
+                    ? 'Source location'
+                    : 'Location'
+                  : form.type === 'Transfer'
+                    ? 'Source warehouse'
+                    : 'Warehouse'
               }
               required
               {...field('warehouseId')}
             >
-              <option value="">Select warehouse</option>
+              <option value="">
+                {locationMode ? 'Select location' : 'Select warehouse'}
+              </option>
               {state.warehouses.map((w) => (
                 <option value={w.id} key={w.id}>
                   {w.name}
@@ -115,7 +161,11 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
             </Field>
             {form.type === 'Transfer' && (
               <Field
-                label="Destination warehouse"
+                label={
+                  locationMode
+                    ? 'Destination location'
+                    : 'Destination warehouse'
+                }
                 required
                 {...field('destinationId')}
               >
@@ -159,8 +209,9 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
                     form.type === 'Adjustment' ? 'Counted quantity' : 'Quantity'
                   }
                   type="number"
-                  min={form.type === 'Adjustment' ? '0' : '0.000001'}
-                  step="any"
+                  min={form.type === 'Adjustment' ? '0' : '0.01'}
+                  max="999999999999.99"
+                  step="0.01"
                   required
                   value={line.quantity}
                   onChange={(e) => setLine(index, 'quantity', e.target.value)}
@@ -195,19 +246,22 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
               Add another product
             </Button>
           </div>
-          <label className="field flex flex-col gap-1.5 text-[11px] font-semibold [&>span]:text-[#53685a] [&_b]:text-[#b49a74] [&_b]:font-normal [&_textarea]:min-h-10 [&_textarea]:w-full [&_textarea]:rounded-[6px] [&_textarea]:border [&_textarea]:border-[#dbe5dd] [&_textarea]:bg-white [&_textarea]:px-[11px] [&_textarea]:py-2 [&_textarea]:text-[12px] [&_textarea::placeholder]:text-[#98a59c] max-[520px]:[&_textarea]:text-[16px]">
-            <span>
-              Notes{' '}
-              <span className="muted text-[#84908b] font-normal">
-                (optional)
+          {
+            <label className="field flex flex-col gap-1.5 text-[11px] font-semibold [&>span]:text-[#53685a] [&_b]:text-[#b49a74] [&_b]:font-normal [&_textarea]:min-h-10 [&_textarea]:w-full [&_textarea]:rounded-[6px] [&_textarea]:border [&_textarea]:border-[#dbe5dd] [&_textarea]:bg-white [&_textarea]:px-[11px] [&_textarea]:py-2 [&_textarea]:text-[12px] [&_textarea::placeholder]:text-[#98a59c] max-[520px]:[&_textarea]:text-[16px]">
+              <span>
+                Notes{' '}
+                <span className="muted text-[#84908b] font-normal">
+                  (optional)
+                </span>
               </span>
-            </span>
-            <textarea
-              rows="3"
-              placeholder="Add context for your team..."
-              {...field('notes')}
-            />
-          </label>
+              <textarea
+                rows="3"
+                maxLength={10000}
+                placeholder="Add context for your team..."
+                {...field('notes')}
+              />
+            </label>
+          }
           {form.type === 'Adjustment' && (
             <p className="info-box py-[13px] px-[15px] bg-[#f6f9f1] border border-[#e5eddc] text-[#82916f] rounded-[7px] text-[11px] leading-[1.8] mt-5 [&_a]:underline [&_a]:text-[#517a3d]">
               Enter the actual quantity counted, not the difference. Validation
@@ -232,7 +286,11 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
               Cancel
             </Button>
             <Button disabled={saving}>
-              {saving ? 'Saving…' : 'Save as draft'}
+              {saving
+                ? 'Saving…'
+                : operation
+                  ? 'Save changes'
+                  : 'Save as draft'}
             </Button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: true, quiet: true });
 
 const app = require('./app');
 const sequelize = require('./config/db');

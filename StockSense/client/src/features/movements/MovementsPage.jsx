@@ -12,11 +12,10 @@ export default function MovementsPage() {
   const [query, setQuery] = useState('')
   const [type, setType] = useState('')
   const [warehouse, setWarehouse] = useState('')
-  const name = (id) => state.warehouses.find((w) => w.id === id)?.name || id
   const rows = state.movements
     .map((m) => ({
       ...m,
-      product: state.products.find((p) => p.id === m.productId),
+      product: state.products.find((p) => p.id === m.productId) || m.product,
     }))
     .filter(
       (m) =>
@@ -24,7 +23,7 @@ export default function MovementsPage() {
           .toLowerCase()
           .includes(query.toLowerCase()) &&
         (!type || m.type === type) &&
-        (!warehouse || m.from === warehouse || m.to === warehouse),
+        (!warehouse || m.warehouseId === warehouse),
     )
   function exportJson() {
     const url = URL.createObjectURL(
@@ -38,9 +37,7 @@ export default function MovementsPage() {
   }
   return (
     <>
-      <PageHeader
-        title="Move history"
-      >
+      <PageHeader title="Move history">
         <Button
           variant="secondary"
           onClick={exportJson}
@@ -108,13 +105,15 @@ export default function MovementsPage() {
               label: 'TYPE',
               render: (m) => <Badge>{m.type}</Badge>,
             },
-            { key: 'from', label: 'FROM', render: (m) => name(m.from) },
-            { key: 'to', label: 'TO', render: (m) => name(m.to) },
+            { key: 'warehouseName', label: 'WAREHOUSE' },
+            { key: 'locationName', label: 'LOCATION' },
+            { key: 'balance', label: 'BALANCE AFTER' },
             {
               key: 'quantity',
-              label: 'QUANTITY',
+              label: 'STOCK CHANGE',
               render: (m) => (
                 <strong>
+                  {m.quantity > 0 ? '+' : ''}
                   {m.quantity}{' '}
                   <span className="muted text-[#84908b] font-normal">
                     {m.product?.unit}

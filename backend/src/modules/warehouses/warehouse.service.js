@@ -106,7 +106,26 @@ const deleteLocation = async (locationId) => {
     return true;
 };
 
+const updateLocation = async (locationId, data) => {
+    const fail = (message, statusCode = 400) => { throw Object.assign(new Error(message), { statusCode }); };
+    if (!data || !Object.keys(data).length || Object.keys(data).some(key => !['name', 'code'].includes(key))) fail('Only location name and code can be edited');
+    const updates = {};
+    if (data.name !== undefined) {
+        if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 255) fail('Enter a valid location name');
+        updates.name = data.name.trim();
+    }
+    if (data.code !== undefined) {
+        if (data.code !== null && (typeof data.code !== 'string' || data.code.trim().length > 255)) fail('Enter a valid location code');
+        updates.code = data.code?.trim() || null;
+    }
+    const location = await Location.findByPk(locationId);
+    if (!location) fail('Location not found', 404);
+    await location.update(updates);
+    return location;
+};
+
 module.exports = {
+    updateLocation,
     createWarehouse,
     getAllWarehouses,
     getWarehouseById,

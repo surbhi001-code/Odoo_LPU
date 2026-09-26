@@ -135,9 +135,9 @@ export default function AuthPage({ mode = 'login' }) {
           setNotice('Please enter your email first.')
           return
         }
-        if (!code || password.trim().length < 8) {
+        if (!code || password.length < 6) {
           setNotice(
-            'Please enter the reset code and a password with at least 8 characters.',
+            'Please enter the reset code and a password with at least 6 characters.',
           )
           return
         }
@@ -155,9 +155,9 @@ export default function AuthPage({ mode = 'login' }) {
         setNotice('Please enter your full name.')
         return
       }
-      if (!email || password.trim().length < 8) {
+      if (!email || !password || (mode === 'signup' && password.length < 6)) {
         setNotice(
-          'Please enter your email and a password with at least 8 characters.',
+          'Please enter your email and a password with at least 6 characters.',
         )
         return
       }
@@ -172,7 +172,6 @@ export default function AuthPage({ mode = 'login' }) {
         name: user.name || name,
         id: user.id,
         role: user.role,
-        token: result.data?.token,
       })
     } catch (error) {
       setNotice(error.message)
@@ -309,7 +308,7 @@ export default function AuthPage({ mode = 'login' }) {
                     autoComplete={
                       mode === 'login' ? 'current-password' : 'new-password'
                     }
-                    minLength={8}
+                    minLength={mode === 'login' ? 1 : 6}
                     required
                   />
                 )}
@@ -331,8 +330,8 @@ export default function AuthPage({ mode = 'login' }) {
                       name="password"
                       icon={LockKeyhole}
                       password
-                      placeholder="At least 8 characters"
-                      minLength={8}
+                      placeholder="At least 6 characters"
+                      minLength={mode === 'login' ? 1 : 6}
                       autoComplete="new-password"
                       required
                     />
@@ -352,7 +351,8 @@ export default function AuthPage({ mode = 'login' }) {
               )}
               {mode === 'signup' && (
                 <p className="mt-2.5 text-[10px] text-[#8d9c91]">
-                  Use at least 8 characters for your password.
+                  Use at least 6 characters. New accounts start as Warehouse
+                  Staff; an administrator can grant manager access.
                 </p>
               )}
               {notice && (

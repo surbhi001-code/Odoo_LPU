@@ -5,7 +5,7 @@ const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require('../../utils/sendEmail');
 const SALT_ROUNDS = 10;
 
-const signup = async ({ name, email, password, role }) => {
+const signup = async ({ name, email, password }) => {
     const existing = await User.findOne({ where: { email } });
     if (existing) {
         const err = new Error('Email already registered');
@@ -19,7 +19,7 @@ const signup = async ({ name, email, password, role }) => {
         name,
         email,
         password_hash,
-        role: role || 'warehouse_staff'
+        role: 'warehouse_staff'
     });
 
     const token = generateToken({ id: user.id, role: user.role });
@@ -92,4 +92,33 @@ const resetPassword = async ({ email, otp, newPassword }) => {
     return true;
 };
 
-module.exports = { signup, login, forgotPassword, resetPassword };
+const updateProfile = async (user, data) => {
+    const fail = (message, statusCode = 400) => { throw Object.assign(new Error(message), { statusCode }); };
+    if (!data || Object.keys(data).some(key => !['name', 'email', 'currentPassword'].includes(key))) fail('Only name and email can be edited here');
+    if (data.name === undefined && data.email === undefined) fail('Provide a name or email to update');
+    const updates = {};
+    if (data.name !== undefined) {
+        if (typeof data.name !== 'string' || !data.name.trim() || data.name.trim().length > 255) fail('Enter a valid name');
+        updates.name = data.name.trim();
+    }
+    if (data.email !== undefined) {
+        if (typeof data.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim()) || data.email.trim().length > 255) fail('Enter a valid email address');
+        const email = data.email.trim().toLowerCase();
+        if (email !== user.email.toLowerCase()) {
+            if (typeof data.currentPassword !== 'string' || !await bcrypt.compare(data.currentPassword, user.password_hash)) fail('Your current password is required to change email', 403);
+            const existing = await User.findOne({ where: { email } });
+            if (existing && existing.id !== user.id) fail('Email already registered', 409);
+            updates.email = email;
+            updates.otp_code = null;
+            updates.otp_expires_at = null;
+        }
+    }
+    try { await user.update(updates); }
+    catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') fail('Email already registered', 409);
+        throw error;
+    }
+    return user;
+};
+
+module.exports = { signup, login, forgotPassword, resetPassword, updateProfile };

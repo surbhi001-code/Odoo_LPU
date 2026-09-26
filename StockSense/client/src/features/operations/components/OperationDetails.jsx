@@ -6,8 +6,15 @@ import Table from '../../../components/ui/Table'
 import { useWorkspace } from '../../../lib/workspaceContext'
 import { formatDate, warehouseName } from '../../../lib/inventory'
 import { updateOperation } from '../api'
-export default function OperationDetails({ id, onClose }) {
-  const { state, mutate } = useWorkspace()
+export default function OperationDetails({
+  id,
+  onClose,
+  workspace,
+  allowValidation = true,
+  onEdit,
+}) {
+  const context = useWorkspace()
+  const { state, mutate } = workspace || context
   const operation = state.operations.find((o) => o.id === id)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -57,6 +64,15 @@ export default function OperationDetails({ id, onClose }) {
           </strong>
         </div>
       </div>
+      {workspace && (
+        <p className="mb-4 text-xs text-[#718174]">
+          Location:{' '}
+          {operation.sourceLocation || operation.destinationLocation || '—'}
+          {operation.type === 'Transfer'
+            ? ` → ${operation.destinationLocation || '—'}`
+            : ''}
+        </p>
+      )}
       <Table
         columns={[
           { key: 'name', label: 'PRODUCT' },
@@ -96,6 +112,11 @@ export default function OperationDetails({ id, onClose }) {
       <div className="border-t border-t-[#e7ece9] pt-[19px] mt-[25px] flex justify-end gap-2.5 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
         {next ? (
           <>
+            {onEdit && (
+              <Button variant="secondary" disabled={saving} onClick={onEdit}>
+                Edit operation
+              </Button>
+            )}
             <Button
               variant="danger"
               disabled={saving}
@@ -103,7 +124,10 @@ export default function OperationDetails({ id, onClose }) {
             >
               Cancel operation
             </Button>
-            <Button disabled={saving} onClick={() => transition(next[0])}>
+            <Button
+              disabled={saving || (next[0] === 'Done' && !allowValidation)}
+              onClick={() => transition(next[0])}
+            >
               {saving ? 'Saving…' : next[1]}
             </Button>
           </>
@@ -113,6 +137,11 @@ export default function OperationDetails({ id, onClose }) {
           </Button>
         )}
       </div>
+      {next?.[0] === 'Done' && !allowValidation && (
+        <p className="mt-3 text-xs text-[#718174]">
+          An inventory manager must validate this operation.
+        </p>
+      )}
     </Modal>
   )
 }

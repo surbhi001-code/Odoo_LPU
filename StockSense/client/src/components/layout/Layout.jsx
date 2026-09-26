@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import GlobalSearch from './GlobalSearch'
 import Button from '../ui/Button'
 import { useWorkspace } from '../../lib/workspaceContext'
+import { endSession } from '../../features/auth/session'
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { state, error, reload } = useWorkspace()
+  const { pathname } = useLocation()
+  const isDashboard = pathname === '/'
+  useEffect(() => {
+    reload()
+  }, [pathname, reload])
   useEffect(() => {
     function searchShortcut(event) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
@@ -35,7 +41,9 @@ export default function Layout() {
           id="main-content"
           className="pt-4.5 px-7 pb-5 flex-1 w-full max-w-425 m-auto min-[1600px]:pt-5 max-[1250px]:pt-4 max-[1250px]:px-5 max-[800px]:py-4 max-[800px]:px-5 max-[520px]:py-4 max-[520px]:px-[15px]"
         >
-          {error ? (
+          {isDashboard ? (
+            <Outlet />
+          ) : error ? (
             <div
               className="py-22.5 px-6 text-center text-[#819576] flex items-center flex-col gap-4.5 [&_p]:text-[13px] [&_p]:max-w-137.5 [&_p]:leading-[1.8]"
               role="alert"
@@ -43,7 +51,11 @@ export default function Layout() {
               <AlertCircle size={30} />
               <h2>We couldn’t load your workspace</h2>
               <p>{error}</p>
-              <Button onClick={reload}>Try again</Button>
+              {error === 'Your session has expired. Please sign in again.' ? (
+                <Button onClick={endSession}>Sign in</Button>
+              ) : (
+                <Button onClick={reload}>Try again</Button>
+              )}
             </div>
           ) : !state ? (
             <div

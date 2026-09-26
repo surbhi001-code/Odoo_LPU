@@ -1,25 +1,33 @@
 const { Op } = require('sequelize');
-const { Product, Category, Inventory, Location } = require('../../database/models');
+const { sequelize, Product, Category, Inventory, Location, Document, DocumentLine } = require('../../database/models');
 
-const createProduct = async (data) => {
-    const existing = await Product.findOne({ where: { sku: data.sku } });
-    if (existing) {
-        const err = new Error('SKU already exists');
-        err.statusCode = 409;
-        throw err;
-    }
+const { randomUUID } = require('crypto');
+const stockService = require('../stock/stock.service');
+const { validQuantity, validId } = require('../operations/operation.validation');
 
+const createProduct = async (data, userId) => sequelize.transaction(async (transaction) => {
+    const quantity = data.initial_stock === undefined ? 0 : data.initial_stock;
+    if (!validQuantity(quantity, true)) throw Object.assign(new Error('Opening stock must be a non-negative quantity with at most two decimals'), { statusCode: 400 });
+    const openingStock = Number(quantity);
+    if (openingStock > 0 && (!validId(data.location_id) || !await Location.findByPk(data.location_id, { transaction }))) throw Object.assign(new Error('Select a valid opening stock location'), { statusCode: 400 });
+    const existing = await Product.findOne({ where: { sku: data.sku }, transaction });
+    if (existing) throw Object.assign(new Error('SKU already exists'), { statusCode: 409 });
     const product = await Product.create({
-        name: data.name,
-        sku: data.sku,
-        category_id: data.category_id || null,
-        unit_of_measure: data.unit_of_measure,
-        reorder_point: data.reorder_point || 0,
-        reorder_qty: data.reorder_qty || null
-    });
-
+        name: data.name, sku: data.sku, category_id: data.category_id || null,
+        unit_of_measure: data.unit_of_measure, reorder_point: data.reorder_point || 0,
+        reorder_qty: data.reorder_qty ?? null,
+    }, { transaction });
+    if (openingStock > 0) {
+        const document = await Document.create({
+            type: 'RECEIPT', reference_no: `REC-OPEN-${randomUUID()}`, status: 'DONE',
+            destination_location_id: Number(data.location_id), notes: 'Opening stock on product creation',
+            partner_name: 'Opening stock', created_by: userId, validated_by: userId, validated_at: new Date(),
+        }, { transaction });
+        await DocumentLine.create({ document_id: document.id, product_id: product.id, quantity: openingStock }, { transaction });
+        await stockService.applyMovement({ productId: product.id, quantity: openingStock, destinationLocationId: Number(data.location_id), documentId: document.id, documentType: 'RECEIPT' }, transaction);
+    }
     return product;
-};
+});
 
 const getAllProducts = async ({ search, category_id, page = 1, limit = 20 }) => {
     const where = { is_active: true };

@@ -6,8 +6,7 @@ import Button from '../../../components/ui/Button'
 import { useWorkspace } from '../../../lib/workspaceContext'
 import { statuses } from '../../../lib/inventory'
 import OperationsTable from '../components/OperationsTable'
-import OperationForm from '../components/OperationForm'
-import OperationDetails from '../components/OperationDetails'
+import DashboardOperation from '../../dashboard/DashboardOperation'
 const descriptions = {
   Receipt: 'Receipts',
   Delivery: 'Delivery orders',
@@ -15,7 +14,7 @@ const descriptions = {
   Adjustment: 'Stock adjustments',
 }
 export default function OperationsPage({ type }) {
-  const { state } = useWorkspace()
+  const { state, reload } = useWorkspace()
   const [params, setParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('')
@@ -48,9 +47,7 @@ export default function OperationsPage({ type }) {
   )
   return (
     <>
-      <PageHeader
-        title={descriptions[type]}
-      >
+      <PageHeader title={descriptions[type]}>
         <Button onClick={() => setCreate(true)}>
           <Plus size={17} />
           New {type.toLowerCase()}
@@ -110,10 +107,21 @@ export default function OperationsPage({ type }) {
         </div>
       </section>
       {create && (
-        <OperationForm initialType={type} onClose={() => setCreate(false)} />
+        <DashboardOperation
+          initialType={type}
+          warehouses={state.warehouses}
+          onChanged={reload}
+          onClose={() => setCreate(false)}
+        />
       )}
       {activeOperation && (
-        <OperationDetails id={activeOperation} onClose={closeOperation} />
+        <DashboardOperation
+          key={activeOperation}
+          id={activeOperation}
+          warehouses={state.warehouses}
+          onChanged={reload}
+          onClose={closeOperation}
+        />
       )}
     </>
   )

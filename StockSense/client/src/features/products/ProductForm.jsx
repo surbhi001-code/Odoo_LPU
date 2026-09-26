@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
 import Field from '../../components/forms/Field'
@@ -14,9 +13,10 @@ export default function ProductForm({ product, onClose }) {
       sku: '',
       category: '',
       unit: 'Units',
-      initialStock: 0,
       reorderLevel: 5,
-      warehouseId: '',
+      reorderQuantity: '',
+      initialStock: 0,
+      locationId: '',
     },
   )
   const [error, setError] = useState('')
@@ -60,17 +60,16 @@ export default function ProductForm({ product, onClose }) {
           <Field
             label="Category"
             placeholder="e.g. Raw materials"
-            required
             list="categories"
             {...field('category')}
           />
           <datalist id="categories">
-            {[...new Set(state.products.map((p) => p.category))].map((c) => (
-              <option key={c} value={c} />
+            {state.categories.map((c) => (
+              <option key={c.id} value={c.name} />
             ))}
           </datalist>
           <Field label="Unit of measure" {...field('unit')}>
-            {units.map((unit) => (
+            {[...new Set([form.unit, ...units])].map((unit) => (
               <option key={unit}>{unit}</option>
             ))}
           </Field>
@@ -83,46 +82,45 @@ export default function ProductForm({ product, onClose }) {
             hint="Alert when stock reaches this quantity."
             {...field('reorderLevel')}
           />
-          {!product && (
-            <>
-              <Field
-                label="Initial stock"
-                type="number"
-                min="0"
-                step="any"
-                required
-                {...field('initialStock')}
-              />
-              <Field
-                label="Opening stock warehouse"
-                required={Number(form.initialStock) > 0}
-                {...field('warehouseId')}
-              >
-                <option value="">Select a warehouse</option>
-                {state.warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </Field>
-            </>
-          )}
+          <Field
+            label="Reorder quantity"
+            type="number"
+            min="0"
+            step="any"
+            {...field('reorderQuantity')}
+          />
         </div>
-        {!product && !state.warehouses.length && (
-          <p className="info-box py-[13px] px-[15px] bg-[#f6f9f1] border border-[#e5eddc] text-[#82916f] rounded-[7px] text-[11px] leading-[1.8] mt-5 [&_a]:underline [&_a]:text-[#517a3d]">
-            You can create a product with zero stock now.{' '}
-            <Link to="/warehouses" onClick={onClose}>
-              Add a warehouse
-            </Link>{' '}
-            before entering initial stock.
-          </p>
+        {!product && (
+          <div className="mt-4 grid grid-cols-2 gap-4 max-[520px]:grid-cols-1">
+            <Field
+              label="Opening stock"
+              type="number"
+              min="0"
+              max="999999999999.99"
+              step="0.01"
+              required
+              {...field('initialStock')}
+            />
+            <Field
+              label="Opening stock location"
+              required={Number(form.initialStock) > 0}
+              {...field('locationId')}
+            >
+              <option value="">Select a location</option>
+              {state.locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.warehouseName} / {location.name}
+                </option>
+              ))}
+            </Field>
+          </div>
         )}
-        {product && (
-          <p className="info-box py-[13px] px-[15px] bg-[#f6f9f1] border border-[#e5eddc] text-[#82916f] rounded-[7px] text-[11px] leading-[1.8] mt-5 [&_a]:underline [&_a]:text-[#517a3d]">
-            Use a receipt or stock adjustment to change quantities. Every stock
-            change is recorded in move history.
-          </p>
-        )}
+        <p className="mt-5 rounded-lg border border-[#e5eddc] bg-[#f6f9f1] p-3 text-xs leading-6 text-[#718174]">
+          {product
+            ? 'Use a receipt or stock adjustment to change quantities.'
+            : 'Opening stock creates a validated receipt at the selected location.'}{' '}
+          Every stock change is recorded in move history.
+        </p>
         {error && (
           <p
             className="text-[11px] text-[#ad6148] py-[11px] px-[13px] bg-[#fff3ee] border border-[#f4ded2] rounded-[6px] mt-[17px] mx-0 mb-0 leading-[1.8]"

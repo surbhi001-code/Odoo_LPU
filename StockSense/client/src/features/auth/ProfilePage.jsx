@@ -4,6 +4,9 @@ import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 import { useWorkspace } from '../../lib/workspaceContext'
 import { endSession, useSession } from './session'
+import ProfileForm from './ProfileForm'
+import TeamAccess from './TeamAccess'
+import { roleLabels, roleDescriptions } from './roles'
 export default function ProfilePage() {
   const { state } = useWorkspace()
   const session = useSession()
@@ -29,18 +32,23 @@ export default function ProfilePage() {
           <div>
             <h2>{session.name}</h2>
             <p>{session.email}</p>
+            <p className="font-semibold">
+              {roleLabels[session.role] || 'Account'}
+            </p>
           </div>
         </div>
+        <ProfileForm />
+        <p className="mt-4 text-xs leading-6 text-[#68775f]">
+          {roleDescriptions[session.role]}
+        </p>
         <div className="info-box mt-4 rounded-lg border border-[#dfe8d9] bg-[#f4f8f1] px-3.5 py-2.5 text-[11px] leading-[1.65] text-[#68775f] [&_a]:text-[#426c36] [&_a]:underline">
-          This is a local frontend session. Your password is not stored or
-          verified. Account authentication and password reset will be connected
-          with the backend.
+          Your account is authenticated by the server. Sign out when you finish
+          using a shared device.
         </div>
         <div className="mt-4.5 border-t border-t-[#e7ece9] pt-4.5 [&_p]:mx-0 [&_p]:mt-1.5 [&_p]:mb-3.5 [&_p]:text-[12px] [&_p]:leading-[1.65] [&_p]:text-[#68786d]">
           <h3>Your workspace data</h3>
           <p>
-            Changes are saved in this browser. Export your JSON to keep a copy.
-            Clearing browser storage removes local changes.
+            Export the server data currently loaded in your workspace as JSON.
           </p>
           <Button variant="secondary" onClick={exportWorkspace}>
             <Download size={16} />
@@ -50,8 +58,8 @@ export default function ProfilePage() {
         <div className="mt-4.5 border-t border-t-[#e7ece9] pt-4.5 [&_p]:mx-0 [&_p]:mt-1.5 [&_p]:mb-3.5 [&_p]:text-[12px] [&_p]:leading-[1.65] [&_p]:text-[#68786d]">
           <h3>Your session</h3>
           <p>
-            Sign out to return to the login screen. Your inventory data stays
-            saved in this browser.
+            Sign out to return to the login screen. Your inventory data remains
+            saved on the server.
           </p>
           <button
             type="button"
@@ -66,6 +74,7 @@ export default function ProfilePage() {
           </button>
         </div>
       </section>
+      {session.role === 'admin' && <TeamAccess />}
     </>
   )
 }

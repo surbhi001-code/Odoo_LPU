@@ -1,43 +1,63 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiClient } from '../lib/apiClient'
 import { WorkspaceContext } from '../lib/workspaceContext'
+import { useSession } from '../features/auth/session'
 
 export default function Providers({ children }) {
   const [state, setState] = useState(null)
   const [error, setError] = useState('')
   const [toast, setToast] = useState('')
+  const session = useSession()
+  const activeRequest = useRef(null)
+  const [loadedFor, setLoadedFor] = useState(null)
   const reload = useCallback(async () => {
+    activeRequest.current?.abort()
+    const controller = new AbortController()
+    activeRequest.current = controller
+    if (!session) return
     setError('')
     try {
-      setState(await apiClient.getWorkspace())
+      const next = await apiClient.getWorkspace(controller.signal)
+      if (controller.signal.aborted) return
+      setState(next)
+      setLoadedFor(session)
+      return next
     } catch (err) {
-      setError(err.message)
+      if (controller.signal.aborted) return
+      setError(
+        err.status === 401
+          ? 'Your session has expired. Please sign in again.'
+          : err.message,
+      )
+      setLoadedFor(session)
     }
-  }, [])
+  }, [session])
   useEffect(() => {
     reload()
+    return () => activeRequest.current?.abort()
   }, [reload])
   useEffect(() => {
     if (!toast) return
     const timer = setTimeout(() => setToast(''), 4500)
     return () => clearTimeout(timer)
   }, [toast])
-  useEffect(() => {
-    const sync = (event) => {
-      if (event.key === 'stocksense.workspace.v1') reload()
-    }
-    window.addEventListener('storage', sync)
-    return () => window.removeEventListener('storage', sync)
-  }, [reload])
   const mutate = async (action, payload, message) => {
-    const next = await apiClient.command(action, payload)
-    setState(next)
+    await apiClient.command(action, payload)
+    // A refresh failure must not make a successful write look unsaved.
+    const next = await reload()
     setToast(message || 'Changes saved')
     return next
   }
   return (
     <WorkspaceContext.Provider
-      value={{ state, error, reload, mutate, notify: setToast }}
+      value={{
+        state: loadedFor === session && session ? state : null,
+        error: loadedFor === session ? error : '',
+        reload,
+        mutate,
+        notify: setToast,
+        canManage: ['admin', 'inventory_manager'].includes(session?.role),
+      }}
     >
       {children}
       {toast && (

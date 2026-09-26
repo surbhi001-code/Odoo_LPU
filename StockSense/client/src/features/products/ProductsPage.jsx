@@ -18,10 +18,10 @@ import Table from '../../components/ui/Table'
 import Modal from '../../components/ui/Modal'
 import EmptyState from '../../components/ui/EmptyState'
 import { useWorkspace } from '../../lib/workspaceContext'
-import { totalStock, stockStatus, quantityAt } from '../../lib/inventory'
+import { totalStock, stockStatus } from '../../lib/inventory'
 import ProductForm from './ProductForm'
 export default function ProductsPage() {
-  const { state } = useWorkspace()
+  const { state, canManage } = useWorkspace()
   const [params, setParams] = useSearchParams()
   const category = params.get('category') || ''
   const setCategory = (value) => setParam('category', value)
@@ -67,7 +67,8 @@ export default function ProductsPage() {
     },
     {
       label: 'Low stock',
-      value: state.products.filter((p) => stockStatus(p) === 'Low stock').length,
+      value: state.products.filter((p) => stockStatus(p) === 'Low stock')
+        .length,
       detail: 'Review reorder levels',
       icon: TriangleAlert,
       tone: 'bg-[#fff1da] text-[#9a651c]',
@@ -87,14 +88,18 @@ export default function ProductsPage() {
   ]
   return (
     <>
-      <PageHeader
-        title="Products"
-      >
-        <Button onClick={() => setEditor({})}>
+      <PageHeader title="Products">
+        <Button disabled={!canManage} onClick={() => setEditor({})}>
           <Plus size={17} />
           Add product
         </Button>
       </PageHeader>
+      {!canManage && (
+        <p className="mb-4 rounded-lg border border-[#dfe7df] bg-white p-3 text-xs leading-6 text-[#68775f]">
+          Warehouse Staff can view products and stock. Ask an administrator for
+          Inventory Manager access to add or edit products.
+        </p>
+      )}
       <div className="mb-4 grid grid-cols-4 gap-2.5 max-[1050px]:grid-cols-2 max-[520px]:gap-2">
         {productStats.map((item) => {
           const Icon = item.icon
@@ -110,9 +115,7 @@ export default function ProductsPage() {
                   : 'border-[#dfe7e2]'
               }`}
             >
-              <span
-                className={`absolute inset-x-0 top-0 h-0.5 ${item.line}`}
-              />
+              <span className={`absolute inset-x-0 top-0 h-0.5 ${item.line}`} />
               <span className="flex items-start justify-between gap-2">
                 <span
                   className={`grid size-7.5 place-items-center rounded-lg ${item.tone}`}
@@ -223,6 +226,7 @@ export default function ProductsPage() {
                   </button>
                   <button
                     className="icon-button border-0 border-transparent inline-flex items-center justify-center w-[31px] h-[31px] rounded-[6px] bg-transparent text-[#819187] p-0 hover:bg-[#ecf2ed] hover:text-[#225c48]"
+                    disabled={!canManage}
                     aria-label={`Edit ${p.name}`}
                     onClick={() => setEditor(p)}
                   >
@@ -244,14 +248,11 @@ export default function ProductsPage() {
               }
             >
               {filtered ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => setParams({})}
-                >
+                <Button variant="secondary" onClick={() => setParams({})}>
                   Clear filters
                 </Button>
               ) : (
-                <Button onClick={() => setEditor({})}>
+                <Button disabled={!canManage} onClick={() => setEditor({})}>
                   <Plus size={16} />
                   Add your first product
                 </Button>
@@ -273,26 +274,26 @@ export default function ProductsPage() {
       {locations && (
         <Modal
           title={locations.name}
-          description="Stock availability by warehouse"
+          description="Stock availability by warehouse and location"
           onClose={() => setLocations(null)}
         >
-          {state.warehouses.length ? (
+          {state.locations.length ? (
             <div className="[&>div]:flex [&>div]:justify-between [&>div]:py-4 [&>div]:px-0 [&>div]:border-b [&>div]:border-b-[#e7ece9] [&>div]:text-[12px] [&>div]:gap-5 [&_small]:block [&_small]:text-[#8b9b7a] [&_small]:mt-[5px]">
-              {state.warehouses.map((w) => (
+              {state.locations.map((w) => (
                 <div key={w.id}>
                   <span>
-                    <strong>{w.name}</strong>
-                    <small>{w.location}</small>
+                    <strong>{w.warehouseName}</strong>
+                    <small>{w.name}</small>
                   </span>
                   <b>
-                    {quantityAt(locations, w.id)} {locations.unit}
+                    {locations.locationStock[w.id] || 0} {locations.unit}
                   </b>
                 </div>
               ))}
             </div>
           ) : (
             <EmptyState
-              title="No warehouses yet"
+              title="No storage locations yet"
               description="Create a warehouse to start tracking stock by location."
             />
           )}
