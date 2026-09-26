@@ -11,16 +11,15 @@ const { protect, restrictTo } = require('../../middleware/auth.middleware');
 
 router.use(protect);
 
+router.patch('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.updateLocation);
+router.delete('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.deleteLocation);
+router.get('/:id/locations', warehouseController.getLocationsByWarehouse);
+router.post('/:id/locations', restrictTo('admin', 'inventory_manager'), validateCreateLocation, warehouseController.createLocation);
+
 router.get('/', warehouseController.getAllWarehouses);
 router.get('/:id', warehouseController.getWarehouseById);
 router.post('/', restrictTo('admin', 'inventory_manager'), validateCreateWarehouse, warehouseController.createWarehouse);
 router.patch('/:id', restrictTo('admin', 'inventory_manager'), validateUpdateWarehouse, warehouseController.updateWarehouse);
 router.delete('/:id', restrictTo('admin', 'inventory_manager'), warehouseController.deleteWarehouse);
-
-// nested location routes
-router.get('/:id/locations', warehouseController.getLocationsByWarehouse);
-router.post('/:id/locations', restrictTo('admin', 'inventory_manager'), validateCreateLocation, warehouseController.createLocation);
-router.delete('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.deleteLocation);
-router.patch('/locations/:locationId', restrictTo('admin', 'inventory_manager'), warehouseController.updateLocation);
 
 module.exports = router;

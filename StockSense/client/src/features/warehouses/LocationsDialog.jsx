@@ -99,8 +99,8 @@ export default function LocationsDialog({ warehouseId, onClose }) {
         {deleting && (
           <div className="space-y-3 rounded-lg border border-[#f4ded2] bg-[#fff3ee] p-3 text-sm">
             <p>
-              Delete {deleting.name}? The server will reject deletion if
-              inventory records still reference it.
+              Delete {deleting.name}? This works when no stock is left here.
+              Transfer or adjust remaining quantity to zero first.
             </p>
             <div className="flex gap-2">
               <Button

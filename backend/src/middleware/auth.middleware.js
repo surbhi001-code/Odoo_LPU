@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../database/models');
 
 const protect = async (req, res, next) => {
+    if (req.method === 'OPTIONS') return next();
     try {
         const token = req.cookies.token;
 
@@ -25,7 +26,8 @@ const protect = async (req, res, next) => {
 
 const restrictTo = (...roles) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
+        if (req.method === 'OPTIONS') return next();
+        if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({ success: false, message: 'Not authorized for this action' });
         }
         next();

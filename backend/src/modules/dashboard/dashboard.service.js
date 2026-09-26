@@ -18,8 +18,11 @@ const getKpis = async () => {
     const pendingDeliveries = await Document.count({ where: { type: 'DELIVERY', status: pendingStatuses } });
     const transfersScheduled = await Document.count({ where: { type: 'TRANSFER', status: pendingStatuses } });
 
+    const unitsOnHand = Number(await Inventory.sum('quantity')) || 0;
+
     return {
         totalProducts,
+        unitsOnHand,
         lowStockCount,
         outOfStockCount,
         pendingReceipts,
@@ -30,10 +33,9 @@ const getKpis = async () => {
 
 // Powers the dashboard's own filtered document list (mirrors operations' filtering, kept here
 // so the dashboard view doesn't need to hit a second module for its filter row)
-const getFilteredDocuments = async ({ type, status, warehouse_id, category_id, page = 1, limit = 20 }) => {
-    
+const getFilteredDocuments = async ({ type, status, warehouse_id, category_id, location_id, page = 1, limit = 20 }) => {
     const operationService = require('../operations/operation.service');
-    return operationService.getAllDocuments({ type, status, warehouse_id, category_id, page, limit });
+    return operationService.getAllDocuments({ type, status, warehouse_id, category_id, location_id, page, limit });
 };
 
 module.exports = { getKpis, getFilteredDocuments };

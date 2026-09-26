@@ -39,7 +39,7 @@ export const navigationGroups = [
     ],
   },
   {
-    label: 'MANAGEMENT',
+    label: 'SETTINGS',
     items: [
       { to: '/movements', label: 'Move history', icon: History },
       { to: '/warehouses', label: 'Warehouses', icon: Warehouse },

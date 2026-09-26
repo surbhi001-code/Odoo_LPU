@@ -10,24 +10,20 @@ export default function AuthGuard({ children }) {
   const [check, setCheck] = useState({ loading: true })
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
-    let controller
+    let ignore = false
     function refreshSession() {
-      controller?.abort()
-      controller = new AbortController()
-      const { signal } = controller
-      httpRequest('/auth/me', { signal })
+      httpRequest('/auth/me')
         .then((user) => {
-          if (signal.aborted) return
+          if (ignore) return
           startSession(user)
           setCheck({ loading: false })
         })
         .catch((error) => {
-          if (signal.aborted) return
+          if (ignore) return
           if (error.status === 401) {
             clearSession()
             setCheck({ loading: false })
           } else {
-            // A temporary background failure must not discard an open form.
             setCheck((current) =>
               current.loading ? { error: error.message } : current,
             )
@@ -37,10 +33,10 @@ export default function AuthGuard({ children }) {
     refreshSession()
     window.addEventListener('focus', refreshSession)
     return () => {
-      controller?.abort()
+      ignore = true
       window.removeEventListener('focus', refreshSession)
     }
-  }, [attempt, location.pathname])
+  }, [attempt])
   if (check.loading)
     return (
       <p role="status" className="p-12 text-center">

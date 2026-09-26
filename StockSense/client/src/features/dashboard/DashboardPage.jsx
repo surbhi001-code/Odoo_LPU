@@ -44,6 +44,7 @@ export default function DashboardPage() {
     type: "",
     status: "",
     warehouse: "",
+    location: "",
     category: "",
   });
   const [page, setPage] = useState(1);
@@ -86,7 +87,7 @@ export default function DashboardPage() {
       kpis.totalProducts,
       Package,
       "green",
-      "Active products in your catalog",
+      `${Number(kpis.unitsOnHand || 0).toLocaleString()} units on hand`,
       "/products",
     ],
     [
@@ -295,13 +296,36 @@ export default function DashboardPage() {
               <option key={status}>{status}</option>
             ))}
           </select>
-          <select aria-label="Filter by warehouse" {...filter("warehouse")}>
+          <select
+            aria-label="Filter by warehouse"
+            value={filters.warehouse}
+            onChange={(e) => {
+              setPage(1);
+              setFilters({
+                ...filters,
+                warehouse: e.target.value,
+                location: "",
+              });
+            }}
+          >
             <option value="">All warehouses</option>
             {state.warehouses.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
               </option>
             ))}
+          </select>
+          <select aria-label="Filter by location" {...filter("location")}>
+            <option value="">All locations</option>
+            {state.warehouses.flatMap((w) =>
+              (w.Locations || [])
+                .filter((l) => !filters.warehouse || w.id === filters.warehouse)
+                .map((l) => (
+                  <option key={l.id} value={String(l.id)}>
+                    {w.name} / {l.name}
+                  </option>
+                )),
+            )}
           </select>
           <select aria-label="Filter by category" {...filter("category")}>
             <option value="">All categories</option>
@@ -320,6 +344,7 @@ export default function DashboardPage() {
                   type: "",
                   status: "",
                   warehouse: "",
+                  location: "",
                   category: "",
                 });
               }}

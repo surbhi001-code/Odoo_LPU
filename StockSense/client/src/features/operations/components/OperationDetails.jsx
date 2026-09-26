@@ -4,8 +4,8 @@ import Badge from '../../../components/ui/Badge'
 import Button from '../../../components/ui/Button'
 import Table from '../../../components/ui/Table'
 import { useWorkspace } from '../../../lib/workspaceContext'
-import { formatDate, warehouseName } from '../../../lib/inventory'
-import { updateOperation } from '../api'
+import { formatDate, today, warehouseName } from '../../../lib/inventory'
+import { createOperation, updateOperation } from '../api'
 export default function OperationDetails({
   id,
   onClose,
@@ -18,14 +18,36 @@ export default function OperationDetails({
   const operation = state.operations.find((o) => o.id === id)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [shelfId, setShelfId] = useState('')
   const next = {
-    Draft: ['Waiting', 'Confirm operation'],
+    Draft: [
+      'Waiting',
+      operation.type === 'Delivery' ? 'Pick items' : 'Confirm operation',
+    ],
     Waiting: [
       'Ready',
-      operation.type === 'Delivery' ? 'Mark picked & packed' : 'Mark as ready',
+      operation.type === 'Delivery' ? 'Pack items' : 'Mark as ready',
     ],
     Ready: ['Done', 'Validate operation'],
   }[operation.status]
+  const locations = state.locations?.length
+    ? state.locations
+    : (state.warehouses || []).flatMap((warehouse) =>
+        (warehouse.Locations || []).map((location) => ({
+          id: String(location.id),
+          warehouseId: String(warehouse.id),
+          name: `${warehouse.name} / ${location.name}`,
+        })),
+      )
+  const receivedAt = locations.find(
+    (location) => location.id === operation.destinationLocationId,
+  )
+  const shelfOptions = locations.filter(
+    (location) =>
+      receivedAt &&
+      location.warehouseId === receivedAt.warehouseId &&
+      location.id !== receivedAt.id,
+  )
   async function transition(status) {
     setSaving(true)
     setError('')
@@ -99,7 +121,9 @@ export default function OperationDetails({
           ? 'This operation has been validated and recorded in move history.'
           : operation.status === 'Canceled'
             ? 'This operation was canceled. Stock was not changed.'
-            : 'Confirm → Mark ready → Validate. Validation applies all quantities to stock and creates movement records.'}
+            : operation.type === 'Delivery'
+              ? 'Pick items → Pack items → Validate. Stock decreases only after validation.'
+              : 'Confirm → Mark ready → Validate. Validation applies all quantities to stock and creates movement records.'}
       </p>
       {error && (
         <p
@@ -142,6 +166,59 @@ export default function OperationDetails({
           An inventory manager must validate this operation.
         </p>
       )}
+      {operation.type === 'Receipt' &&
+        operation.status === 'Done' &&
+        shelfOptions.length > 0 && (
+          <form
+            className="mt-4 space-y-3 border-t border-[#e7ece9] pt-4"
+            onSubmit={async (event) => {
+              event.preventDefault()
+              setSaving(true)
+              setError('')
+              try {
+                await createOperation(mutate, {
+                  type: 'Transfer',
+                  partner: 'Putaway / shelving',
+                  warehouseId: operation.destinationLocationId,
+                  destinationId: shelfId,
+                  scheduledDate: today(),
+                  notes: `Shelved from ${operation.reference}`,
+                  lines: operation.lines.map((line) => ({
+                    productId: line.productId,
+                    quantity: line.quantity,
+                  })),
+                })
+                onClose()
+              } catch (err) {
+                setError(err.message)
+              } finally {
+                setSaving(false)
+              }
+            }}
+          >
+            <p className="text-xs text-[#718174]">
+              Shelve received goods to another location in this warehouse. A
+              draft internal transfer is created — validate it to move stock.
+            </p>
+            <select
+              required
+              aria-label="Shelve to location"
+              value={shelfId}
+              onChange={(event) => setShelfId(event.target.value)}
+              className="h-8.5 w-full rounded-[6px] border border-[#dce5df] bg-white px-2.5 text-[11px] font-medium text-[#53665a]"
+            >
+              <option value="">Choose rack or storage location</option>
+              {shelfOptions.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+            <Button disabled={saving || !shelfId}>
+              {saving ? 'Saving…' : 'Create shelving transfer'}
+            </Button>
+          </form>
+        )}
     </Modal>
   )
 }

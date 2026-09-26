@@ -92,6 +92,7 @@ export async function getDocuments(filters, page, signal) {
   if (filters.type) query.set('type', filters.type.toUpperCase())
   if (filters.status) query.set('status', filters.status.toUpperCase())
   if (filters.category) query.set('category_id', filters.category)
+  if (filters.location) query.set('location_id', filters.location)
   // The backend warehouse filter only checks the source. Fetch every matching
   // page and include either end so receipts and inbound transfers stay visible.
   if (filters.warehouse) {
@@ -104,8 +105,11 @@ export async function getDocuments(filters, page, signal) {
       .map(mapDocument)
       .filter(
         (d) =>
-          d.warehouseId === filters.warehouse ||
-          d.destinationId === filters.warehouse,
+          (d.warehouseId === filters.warehouse ||
+            d.destinationId === filters.warehouse) &&
+          (!filters.location ||
+            d.sourceLocationId === filters.location ||
+            d.destinationLocationId === filters.location),
       )
     return {
       rows: rows.slice((page - 1) * 8, page * 8),
