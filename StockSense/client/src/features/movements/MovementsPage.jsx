@@ -39,9 +39,7 @@ export default function MovementsPage() {
   return (
     <>
       <PageHeader
-        eyebrow="THE COMPLETE PICTURE"
         title="Move history"
-        description="A traceable record of every stock movement."
       >
         <Button
           variant="secondary"
@@ -52,9 +50,9 @@ export default function MovementsPage() {
           Export JSON
         </Button>
       </PageHeader>
-      <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502]">
-        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#e4eae2] [&_select]:rounded-[5px] [&_select]:py-[7px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[10px] [&_select]:text-[#7c8c78] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8 py-4.5 px-[21px] flex gap-3 items-center max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-[15px] max-[520px]:gap-2.5 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[9px]">
-          <div className="search-input flex items-center gap-[9px] flex-1 text-[#98a48e] [&_input]:border-0 [&_input]:border-transparent [&_input]:text-[11px] [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#a0aa97]">
+      <section className="overflow-hidden rounded-xl border border-[#dfe7e2] bg-white shadow-[0_3px_10px_#153a2508]">
+        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#dce5df] [&_select]:rounded-[6px] [&_select]:py-[6px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[11px] [&_select]:font-medium [&_select]:text-[#53665a] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8.5 py-3 px-5 flex gap-2.5 items-center border-b border-[#edf1ee] max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-3 max-[520px]:gap-2 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[10px]">
+          <div className="search-input flex h-8.5 items-center gap-2.5 flex-1 rounded-md border border-[#dce5df] px-3 text-[#73847a] focus-within:border-[#7da086] focus-within:ring-2 focus-within:ring-[#e4ece6] [&_input]:border-0 [&_input]:text-[12px] [&_input]:text-[#354b3e] [&_input]:outline-none [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#89988f]">
             <Search size={17} />
             <input
               aria-label="Search move history"
@@ -141,7 +139,7 @@ export default function MovementsPage() {
             />
           }
         />
-        <div className="py-3 px-[21px] border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#a0ab98] [&>span]:text-[8px] [&>span]:text-[#a8b19f] max-[520px]:py-3 max-[520px]:px-[15px] max-[520px]:[&>span]:hidden">
+        <div className="py-2.5 px-5 border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#7d8c82] [&>span]:text-[9px] [&>span]:text-[#8b978f] max-[520px]:px-3 max-[520px]:[&>span]:hidden">
           {rows.length} movement{rows.length !== 1 ? 's' : ''}
           <span>Only validated operations change stock</span>
         </div>

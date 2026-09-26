@@ -1,10 +1,10 @@
 const tones = {
-  green: 'bg-[#edf5e8] text-[#6a9259]',
-  blue: 'bg-[#ecf3fb] text-[#719bbd]',
-  purple: 'bg-[#f1edf9] text-[#9d84be]',
-  amber: 'bg-[#fdf4e6] text-[#bc9857]',
-  gray: 'bg-[#f0f3ed] text-[#8d9c7f]',
-  red: 'bg-[#fcf0eb] text-[#c1816a]',
+  green: 'border-[#b8d2b8] bg-[#e2f0e2] text-[#2f6b3b]',
+  blue: 'border-[#bfd2e2] bg-[#e5eff7] text-[#3f6f92]',
+  purple: 'border-[#d0c5e2] bg-[#ece7f5] text-[#6f5792]',
+  amber: 'border-[#e5c995] bg-[#fbedd2] text-[#8a5b16]',
+  gray: 'border-[#cfd8cb] bg-[#e9eee6] text-[#5f7059]',
+  red: 'border-[#e4b9aa] bg-[#f7e5df] text-[#944b38]',
 }
 const colors = {
   Done: 'green',
@@ -23,7 +23,7 @@ const colors = {
 export default function Badge({ children }) {
   return (
     <span
-      className={`inline-flex gap-[5px] items-center py-1 px-[7px] rounded-[5px] text-[9px] font-medium whitespace-nowrap [&_i]:w-1 [&_i]:h-1 [&_i]:rounded-full [&_i]:bg-current ${tones[colors[children] || 'gray']}`}
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 py-1.5 text-[10px] leading-none font-semibold [&_i]:size-1.5 [&_i]:rounded-full [&_i]:bg-current ${tones[colors[children] || 'gray']}`}
     >
       <i />
       {children}

@@ -13,7 +13,7 @@ export default function Button({
 }) {
   return (
     <button
-      className={`button border rounded-[6px] min-h-[37px] py-[9px] px-[15px] inline-flex items-center justify-center gap-2 text-[11px] font-semibold leading-[1.4] whitespace-nowrap transition duration-150 active:translate-y-px ${variants[variant] || variants.primary} ${className}`}
+      className={`button inline-flex min-h-[37px] items-center justify-center gap-2 whitespace-nowrap rounded-[6px] border px-[15px] py-2 text-[12px] leading-[1.4] font-semibold transition duration-150 active:translate-y-px ${variants[variant] || variants.primary} ${className}`}
       {...props}
     >
       {children}

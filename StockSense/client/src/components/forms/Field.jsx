@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
 const controlClasses =
-  'min-h-10 w-full rounded-md border border-[#dfe7d8] bg-white px-[11px] py-2.5 text-xs placeholder:text-[#aab4a1] max-[520px]:text-base'
+  'min-h-9.5 w-full rounded-md border border-[#dbe5dd] bg-white px-[11px] py-2 text-xs text-[#354b3e] placeholder:text-[#98a59c] focus:border-[#7da086] max-[520px]:text-base'
 
 export default function Field({
   label,
@@ -13,10 +13,10 @@ export default function Field({
   const id = useId()
   return (
     <label
-      className="field flex flex-col gap-2 text-[11px] font-medium"
+      className="field flex flex-col gap-1.5 text-[11px] font-semibold"
       htmlFor={id}
     >
-      <span className="text-[#697c60]">
+      <span className="text-[#53685a]">
         {label}
         {props.required && (
           <span className="font-normal text-[#b49a74]"> *</span>

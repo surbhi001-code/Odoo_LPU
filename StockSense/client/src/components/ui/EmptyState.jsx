@@ -8,9 +8,9 @@ export default function EmptyState({
 }) {
   return (
     <div
-      className={`empty-state flex items-center justify-center flex-col min-h-61 py-[35px] px-5 whitespace-normal text-center [&_h3]:text-[13px] [&_h3]:font-[650] [&_h3]:text-[#607456] [&_h3]:mb-[7px] [&_h3]:tracking-[-0.15px] [&_p]:text-[10px] [&_p]:text-[#98a28f] [&_p]:max-w-87.5 [&_p]:leading-[1.8] [&_p]:mb-3.5 [&_.text-link]:text-[10px] [&.compact]:min-h-[173px] [&.compact]:pt-[15px] [&.compact]:px-5 [&.compact]:pb-5 min-[1600px]:min-h-67.5 max-[520px]:py-7.5 max-[520px]:px-4.5 max-[520px]:min-h-60 max-[520px]:[&_h3]:text-[12px] max-[520px]:[&_p]:text-[10px] ${compact ? 'compact [&_.empty-icon]:h-[35px] [&_.empty-icon]:w-[35px] [&_.empty-icon]:rounded-[10px] [&_.empty-icon]:shadow-none [&_.empty-icon]:mt-0 [&_.empty-icon]:mx-0 [&_.empty-icon]:mb-[13px] [&_.empty-icon_svg]:w-[19px] [&_.empty-icon_svg]:h-[19px] [&_h3]:text-[11px] [&_p]:text-[9px] [&_p]:max-w-67.5 [&_p]:mb-0 min-[1600px]:[&.empty-state]:min-h-47.5' : ''}`}
+      className={`empty-state flex min-h-52 flex-col items-center justify-center px-5 py-7 whitespace-normal text-center [&_h3]:mb-1.5 [&_h3]:text-[14px] [&_h3]:font-[650] [&_h3]:tracking-[-0.15px] [&_h3]:text-[#4d654f] [&_p]:mb-3 [&_p]:max-w-87.5 [&_p]:text-[11px] [&_p]:leading-[1.65] [&_p]:text-[#7d8b82] [&_.text-link]:text-[11px] [&.compact]:min-h-[150px] [&.compact]:px-5 [&.compact]:py-4 max-[520px]:min-h-48 max-[520px]:px-4.5 max-[520px]:py-6 max-[520px]:[&_h3]:text-[13px] ${compact ? 'compact [&_.empty-icon]:h-[35px] [&_.empty-icon]:w-[35px] [&_.empty-icon]:rounded-[10px] [&_.empty-icon]:shadow-none [&_.empty-icon]:mt-0 [&_.empty-icon]:mx-0 [&_.empty-icon]:mb-2.5 [&_.empty-icon_svg]:w-[19px] [&_.empty-icon_svg]:h-[19px] [&_h3]:text-[12px] [&_p]:text-[10px] [&_p]:max-w-67.5 [&_p]:mb-0' : ''}`}
     >
-      <div className="empty-icon h-[53px] w-[53px] grid place-items-center border border-[#e7ede1] rounded-[15px] bg-[#f8faf5] text-[#a4b398] shadow-[0_0_0_6px_#fcfdfb] mt-0 mx-0 mb-4.5 rotate-[-5deg] [&_svg]:rotate-[5deg]">
+      <div className="empty-icon mb-3.5 grid size-12 rotate-[-5deg] place-items-center rounded-[13px] border border-[#dfe8dc] bg-[#f6f9f4] text-[#8da082] shadow-[0_0_0_5px_#fafcf9] [&_svg]:rotate-[5deg]">
         <Icon size={25} strokeWidth={1.5} />
       </div>
       <h3>{title}</h3>

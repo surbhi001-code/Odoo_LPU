@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Bell, CircleHelp, LogOut, Menu, UserRound } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Bell,
+  CalendarDays,
+  CircleHelp,
+  LogOut,
+  Menu,
+  UserRound,
+} from 'lucide-react'
 import { useWorkspace } from '../../lib/workspaceContext'
-import { stockStatus } from '../../lib/inventory'
+import { formatDate, stockStatus } from '../../lib/inventory'
 import { endSession, useSession } from '../../features/auth/session'
 
 const iconButton =
@@ -10,6 +17,7 @@ const iconButton =
 
 export default function Topbar({ onMenu, menuOpen }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { state, notify } = useWorkspace()
   const session = useSession()
   const [profileOpen, setProfileOpen] = useState(false)
@@ -70,6 +78,12 @@ export default function Topbar({ onMenu, menuOpen }) {
       >
         <Menu size={21} />
       </button>
+      {location.pathname === '/' && (
+        <span className="mr-2 flex items-center gap-2 border-r border-[#e7ece9] pr-4 text-[11px] font-medium text-[#68786e] max-[800px]:hidden">
+          <CalendarDays size={15} strokeWidth={1.8} />
+          {formatDate(new Date())}
+        </span>
+      )}
       <button
         type="button"
         className={iconButton}

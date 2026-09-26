@@ -20,7 +20,6 @@ import {
   Check,
   Warehouse,
   Activity,
-  CalendarDays,
 } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/ui/Button";
@@ -142,46 +141,51 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        eyebrow="YOUR WORKSPACE, AT A GLANCE"
         title="Inventory overview"
-        description="A little clarity. A lot more control over your stock."
       >
-        <span className="flex items-center gap-2 text-[10px] text-[#87938a] whitespace-nowrap max-[1250px]:hidden">
-          <CalendarDays size={16} />
-          {formatDate(new Date())}
-        </span>
         <Button onClick={() => setCreateType("Receipt")}>
           <Plus size={17} />
           New operation
         </Button>
       </PageHeader>
-      <div className="grid grid-cols-5 gap-3.5 mb-6 max-[1050px]:gap-[9px] max-[800px]:grid-cols-3 max-[800px]:gap-3 max-[520px]:grid-cols-2 max-[520px]:gap-2.5 max-[520px]:mb-4.5 max-[520px]:[&_.metric-card:last-child]:col-span-full max-[520px]:[&_.metric-card:last-child]:grid max-[520px]:[&_.metric-card:last-child]:grid-cols-[36px_1fr_auto] max-[520px]:[&_.metric-card:last-child]:gap-y-[3px] max-[520px]:[&_.metric-card:last-child]:gap-x-[13px] max-[520px]:[&_.metric-card:last-child]:items-center">
-        {metrics.map(([title, value, Icon, color, caption, link]) => (
+      <div className="grid grid-cols-10 gap-3.5 mb-5 max-[1250px]:grid-cols-6 max-[800px]:grid-cols-2 max-[800px]:gap-3 max-[520px]:gap-2.5 max-[520px]:mb-4">
+        {metrics.map(([title, value, Icon, color, caption, link], index) => (
           <Link
             to={link}
-            className="metric-card block bg-white border border-[#e7ece9] rounded-[9px] pt-[17px] px-[17px] pb-[15px] shadow-[0_2px_3px_#153a2502] transition duration-200 hover:border-[#aac2ad] hover:-translate-y-0.5 [&_p]:text-[11px] [&_p]:text-[#76877b] [&_p]:mb-[5px] min-[1600px]:p-5.5 max-[1250px]:py-3.5 max-[1250px]:px-3 max-[1050px]:[&_p]:text-[10px] max-[800px]:p-4 max-[800px]:[&_p]:text-[11px] max-[520px]:p-3.5 max-[520px]:[&:last-child_.metric-top]:row-span-2 max-[520px]:[&:last-child_.metric-top]:m-0 max-[520px]:[&:last-child_.metric-arrow]:hidden max-[520px]:[&:last-child_p]:m-0 max-[520px]:[&:last-child_.metric-value]:col-start-3 max-[520px]:[&:last-child_.metric-value]:row-span-2 max-[520px]:[&:last-child_.metric-value]:text-[25px] max-[520px]:[&:last-child_.metric-caption]:col-start-2 max-[520px]:[&:last-child_.metric-caption]:row-start-2 max-[520px]:[&:last-child_.metric-caption]:m-0"
+            className={`metric-card group relative col-span-2 flex min-h-[140px] flex-col overflow-hidden rounded-xl border border-[#dce5df] bg-white p-4 shadow-[0_3px_10px_#173b2910] transition duration-200 hover:-translate-y-0.5 hover:border-[#94b39c] hover:shadow-[0_8px_22px_#173b2914] max-[1250px]:min-h-[132px] max-[800px]:col-span-1 max-[520px]:min-h-[128px] max-[520px]:p-3.5 ${
+              index > 2
+                ? "max-[1250px]:col-span-3 max-[800px]:col-span-1"
+                : "max-[1250px]:col-span-2"
+            } ${index === metrics.length - 1 ? "max-[520px]:col-span-2" : ""}`}
             key={title}
           >
-            <div className="metric-top flex justify-between items-center mb-3.5 max-[520px]:mb-2.5">
-              <span
-                className={`h-[33px] w-[33px] rounded-[8px] grid place-items-center ${metricColors[color]}`}
-              >
-                <Icon size={19} />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-[#7fa487]" />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className={`grid size-9 shrink-0 place-items-center rounded-[9px] ${metricColors[color]}`}
+                >
+                  <Icon size={19} strokeWidth={1.8} />
+                </span>
+                <p className="text-[12px] leading-[1.35] font-semibold text-[#43594b]">
+                  {title}
+                </p>
+              </div>
+              <span className="grid size-7 shrink-0 place-items-center rounded-full text-[#8fa096] transition group-hover:bg-[#edf4ef] group-hover:text-[#426b50]">
+                <ArrowUpRight size={15} />
               </span>
-              <ArrowUpRight size={16} className="metric-arrow text-[#b2beb5]" />
             </div>
-            <p>{title}</p>
-            <strong className="metric-value block font-sans text-[30px] leading-[1.4] font-[750] tracking-[-1px] text-[#334d3c] max-[1050px]:text-[26px] max-[520px]:text-[27px]">
+            <strong className="mt-2.5 block font-sans text-[30px] leading-none font-[750] tracking-[-1.2px] text-[#1f3b2d] max-[520px]:text-[28px]">
               {value.toLocaleString()}
             </strong>
-            <span className="metric-caption text-[9px] text-[#97a097] block mt-1.5 max-[1250px]:text-[8px] max-[1050px]:leading-[1.6] max-[1050px]:min-h-6 max-[800px]:min-h-0 max-[800px]:text-[9px] max-[520px]:text-[8px]">
+            <span className="mt-auto border-t border-[#edf1ee] pt-2 text-[10px] leading-[1.4] font-medium text-[#6c7d72] max-[520px]:text-[9px]">
               {caption}
             </span>
           </Link>
         ))}
       </div>
       {completed < 3 && (
-        <section className="relative overflow-hidden bg-[#edf3e8] border border-[#dfe9d7] grid grid-cols-[1fr_1.13fr_0.66fr] gap-6.5 py-[27px] px-7 rounded-[9px] min-h-[217px] mb-5 [&_.eyebrow]:text-[8px] [&_.eyebrow]:text-[#78916c] [&_h2]:text-[20px] [&_h2]:leading-[1.55] [&_h2]:tracking-[-0.7px] [&_h2]:text-[#345238] [&_h2]:font-[750] [&_p]:text-[10px] [&_p]:text-[#84947b] [&_p]:mt-[9px] min-[1600px]:grid-cols-[1fr_1.2fr_0.8fr] max-[1250px]:gap-5 max-[1250px]:p-6 max-[1250px]:grid-cols-[1fr_1.15fr_0.6fr] max-[1250px]:[&_h2]:text-[18px] max-[1050px]:grid-cols-[1fr_1.15fr] max-[800px]:p-5.5 max-[800px]:gap-5 max-[800px]:[&_h2]:text-[19px] max-[520px]:block max-[520px]:p-5 max-[520px]:[&_h2]:text-[20px] max-[520px]:[&_h2]:leading-[1.4] max-[520px]:[&_h2_br]:hidden max-[520px]:[&_p]:mt-[7px]">
+        <section className="relative overflow-hidden bg-[#edf3e8] border border-[#d7e3cf] grid grid-cols-[1fr_1.13fr_0.66fr] gap-5 py-5 px-6 rounded-[9px] min-h-[190px] mb-4 [&_.eyebrow]:text-[9px] [&_.eyebrow]:text-[#5f7955] [&_h2]:text-[21px] [&_h2]:leading-[1.4] [&_h2]:tracking-[-0.7px] [&_h2]:text-[#294a31] [&_h2]:font-[750] [&_p]:text-[11px] [&_p]:text-[#65775f] [&_p]:mt-1.5 min-[1600px]:grid-cols-[1fr_1.2fr_0.8fr] max-[1250px]:gap-4 max-[1250px]:p-5 max-[1250px]:grid-cols-[1fr_1.15fr_0.6fr] max-[1250px]:[&_h2]:text-[20px] max-[1050px]:grid-cols-[1fr_1.15fr] max-[800px]:p-5 max-[800px]:gap-4 max-[800px]:[&_h2]:text-[20px] max-[520px]:block max-[520px]:p-5 max-[520px]:[&_h2]:text-[20px] max-[520px]:[&_h2]:leading-[1.4] max-[520px]:[&_h2_br]:hidden max-[520px]:[&_p]:mt-[7px]">
           <div>
             <span className="eyebrow text-[9px] font-[650] tracking-[1.55px] text-[#7f9587] mb-[7px]">
               LET’S GET YOU STARTED
@@ -192,7 +196,7 @@ export default function DashboardPage() {
               {" inventory starts here."}
             </h2>
             <p>Three small steps. One clear picture.</p>
-            <div className="flex items-center gap-[9px] mt-[17px] [&>div]:w-[83px] [&>div]:h-1 [&>div]:rounded-[5px] [&>div]:bg-[#d9e5cf] [&>div]:overflow-hidden [&>div>span]:block [&>div>span]:h-full [&>div>span]:bg-[#678b55] [&_small]:text-[8px] [&_small]:text-[#8a9b7e] max-[520px]:mt-[13px]">
+            <div className="flex items-center gap-2 mt-3 [&>div]:w-[83px] [&>div]:h-1 [&>div]:rounded-[5px] [&>div]:bg-[#d9e5cf] [&>div]:overflow-hidden [&>div>span]:block [&>div>span]:h-full [&>div>span]:bg-[#678b55] [&_small]:text-[10px] [&_small]:font-medium [&_small]:text-[#65785d] max-[520px]:mt-[13px]">
               <div>
                 <span
                   className={["w-0", "w-1/3", "w-2/3", "w-full"][completed]}
@@ -205,7 +209,7 @@ export default function DashboardPage() {
             {steps.map((step, index) => (
               <Link
                 to={step.to}
-                className={`flex items-center gap-3 bg-[#ffffffa3] border border-[#e0e8d9] rounded-[7px] py-[11px] px-3 transition duration-150 hover:bg-white [&_strong]:text-[10px] [&_strong]:font-semibold [&_strong]:block [&_small]:text-[9px] [&_small]:text-[#94a08c] [&_small]:block [&_small]:mt-1 [&>svg]:ml-auto [&>svg]:text-[#a2b693] [&.done_.step-number]:bg-[#d3e8bd] [&.done_.step-number]:text-[#467140] max-[520px]:p-3 max-[520px]:[&_strong]:text-[11px] max-[520px]:[&_small]:text-[10px] ${step.done ? "done" : ""}`}
+                className={`flex items-center gap-3 bg-[#ffffffb8] border border-[#d8e3d2] rounded-[7px] py-2.5 px-3 transition duration-150 hover:bg-white [&_strong]:text-[11px] [&_strong]:text-[#314b38] [&_strong]:font-semibold [&_strong]:block [&_small]:text-[10px] [&_small]:text-[#6f7f69] [&_small]:block [&_small]:mt-0.5 [&>svg]:ml-auto [&>svg]:text-[#78906b] [&.done_.step-number]:bg-[#d3e8bd] [&.done_.step-number]:text-[#3b6537] max-[520px]:p-3 max-[520px]:[&_strong]:text-[11px] max-[520px]:[&_small]:text-[10px] ${step.done ? "done" : ""}`}
                 key={step.title}
               >
                 <span className="step-number h-[27px] w-[27px] grid place-items-center bg-[#ecf2e5] rounded-[6px] text-[#87a26e] text-[10px] font-semibold">
@@ -241,23 +245,8 @@ export default function DashboardPage() {
           </div>
         </section>
       )}
-      <div className="flex items-center gap-2.5 mt-0 mx-0 mb-[25px] [&>span]:text-[8px] [&>span]:text-[#91a08e] [&>span]:tracking-[1.2px] [&>span]:font-semibold [&>span]:whitespace-nowrap [&>span]:mr-0.5 [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:bg-white [&_button]:border [&_button]:border-[#e7ece9] [&_button]:rounded-[6px] [&_button]:flex-1 [&_button]:py-[11px] [&_button]:px-3 [&_button]:text-[10px] [&_button]:text-[#627661] [&_button]:whitespace-nowrap [&_button:hover]:border-[#9eb394] [&_button:hover]:bg-[#f8faf5] [&_button>svg:last-child]:ml-auto [&_button>svg:last-child]:text-[#a2b19b] max-[1250px]:[&>span]:hidden max-[1050px]:flex-wrap max-[1050px]:[&_button]:flex-[1_0_42%] max-[520px]:gap-2 max-[520px]:mb-5 max-[520px]:[&_button]:p-2.5 max-[520px]:[&_button]:text-[9px] max-[520px]:[&_button]:gap-1.5 max-[520px]:[&_button>svg]:w-[15px] max-[520px]:[&_button>svg:last-child]:w-3">
-        <span>QUICK ACTIONS</span>
-        {[
-          [ArrowDownToLine, "Create receipt", "Receipt"],
-          [ArrowUpFromLine, "Create delivery", "Delivery"],
-          [ArrowLeftRight, "Transfer stock", "Transfer"],
-          [SlidersHorizontal, "Adjust inventory", "Adjustment"],
-        ].map(([Icon, title, type]) => (
-          <button key={title} onClick={() => setCreateType(type)}>
-            <Icon size={17} />
-            {title}
-            <Plus size={14} />
-          </button>
-        ))}
-      </div>
       <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502]">
-        <div className="panel-heading pt-[21px] px-[21px] pb-4.5 flex items-center justify-between gap-3 [&_p]:text-[10px] [&_p]:text-[#909a92] [&_p]:mt-[7px] [&_h2]:flex [&_h2]:items-center [&_h2]:gap-[9px] max-[1050px]:p-4.5 max-[520px]:pt-4.5 max-[520px]:px-[15px] max-[520px]:pb-[15px] max-[520px]:[&_h2]:text-[14px]">
+        <div className="panel-heading pt-4.5 px-5 pb-3.5 flex items-center justify-between gap-3 [&_p]:text-[11px] [&_p]:text-[#6f7d73] [&_p]:mt-1 [&_h2]:text-[17px] [&_h2]:flex [&_h2]:items-center [&_h2]:gap-2 max-[1050px]:p-4 max-[520px]:pt-4 max-[520px]:px-[15px] max-[520px]:pb-3 max-[520px]:[&_h2]:text-[15px]">
           <div>
             <h2>
               Operations overview{" "}
@@ -267,13 +256,13 @@ export default function DashboardPage() {
             </h2>
             <p>Every incoming, outgoing, and in-between.</p>
           </div>
-          <span className="text-[#95a18f] text-[9px] whitespace-nowrap [&_.live-dot]:w-[5px] [&_.live-dot]:h-[5px] [&_.live-dot]:bg-[#adc698] max-[1050px]:hidden">
+          <span className="text-[#68776b] text-[10px] font-medium whitespace-nowrap [&_.live-dot]:w-[5px] [&_.live-dot]:h-[5px] [&_.live-dot]:bg-[#87ad74] max-[1050px]:hidden">
             <span className="live-dot w-1.5 h-1.5 bg-[#82af70] rounded-full inline-block mr-1.5" />
             Your latest operations
           </span>
         </div>
-        <div className="pt-0 px-[21px] pb-[17px] flex items-center gap-[9px] flex-wrap [&_select]:appearance-auto [&_select]:border [&_select]:border-[#e4eae2] [&_select]:rounded-[5px] [&_select]:py-[7px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[10px] [&_select]:text-[#7c8c78] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8 [&_select:first-of-type]:min-w-[153px] max-[520px]:pt-0 max-[520px]:px-[15px] max-[520px]:pb-[15px] max-[520px]:grid max-[520px]:grid-cols-2 max-[520px]:gap-2 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:w-full max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[9px] max-[520px]:[&_select]:p-[7px] max-[520px]:[&_select]:h-8 max-[520px]:[&_select:first-of-type]:min-w-0 max-[520px]:[&_select:first-of-type]:w-full max-[520px]:[&_select:first-of-type]:max-w-full max-[520px]:[&_select:first-of-type]:text-[9px] max-[520px]:[&_select:first-of-type]:p-[7px] max-[520px]:[&_select:first-of-type]:h-8">
-          <span className="flex items-center gap-[7px] text-[10px] text-[#919d93] mr-[7px] max-[1050px]:hidden">
+        <div className="pt-0 px-5 pb-3.5 flex items-center gap-2 flex-wrap [&_select]:appearance-auto [&_select]:border [&_select]:border-[#dce5df] [&_select]:rounded-[5px] [&_select]:py-[7px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[11px] [&_select]:font-medium [&_select]:text-[#52665a] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8.5 [&_select:first-of-type]:min-w-[153px] max-[520px]:pt-0 max-[520px]:px-[15px] max-[520px]:pb-[15px] max-[520px]:grid max-[520px]:grid-cols-2 max-[520px]:gap-2 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:w-full max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[10px] max-[520px]:[&_select]:p-[7px] max-[520px]:[&_select]:h-8 max-[520px]:[&_select:first-of-type]:min-w-0 max-[520px]:[&_select:first-of-type]:w-full max-[520px]:[&_select:first-of-type]:max-w-full max-[520px]:[&_select:first-of-type]:text-[10px] max-[520px]:[&_select:first-of-type]:p-[7px] max-[520px]:[&_select:first-of-type]:h-8">
+          <span className="flex items-center gap-[7px] text-[11px] font-medium text-[#607166] mr-1 max-[1050px]:hidden">
             <SlidersHorizontal size={16} />
             Filter by
           </span>
