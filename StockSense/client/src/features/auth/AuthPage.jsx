@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import {
   ArrowDownToLine,
   ArrowRight,
@@ -100,9 +100,18 @@ function Brand({ light = false }) {
 export default function AuthPage({ mode = 'login' }) {
   const session = useSession()
   const location = useLocation()
-  const [notice, setNotice] = useState('')
-  const [stage, setStage] = useState('email')
-  const [resetEmail, setResetEmail] = useState('')
+  const navigate = useNavigate()
+  const [notice, setNotice] = useState(() =>
+    mode === 'login' && location.state?.notice ? location.state.notice : '',
+  )
+  const [resetEmail, setResetEmail] = useState(() => {
+    try {
+      return sessionStorage.getItem('stocksense.reset-email') || ''
+    } catch {
+      return ''
+    }
+  })
+  const [stage, setStage] = useState(() => (resetEmail ? 'code' : 'email'))
   const isResetCode = mode === 'reset' && stage === 'code'
   const copy = content[mode]
 
@@ -126,6 +135,11 @@ export default function AuthPage({ mode = 'login' }) {
         }
         const result = await forgotPassword(email)
         setResetEmail(email)
+        try {
+          sessionStorage.setItem('stocksense.reset-email', email)
+        } catch {
+          /* ignore */
+        }
         setStage('code')
         setNotice(result.message || 'OTP sent to your email')
         return
@@ -143,12 +157,24 @@ export default function AuthPage({ mode = 'login' }) {
           return
         }
         const result = await resetPassword({
-          email,
+          email: email.toLowerCase(),
           otp: code,
           newPassword: password,
         })
+        try {
+          sessionStorage.removeItem('stocksense.reset-email')
+        } catch {
+          /* ignore */
+        }
+        setResetEmail('')
         setStage('email')
-        setNotice(result.message || 'Password reset successful')
+        navigate('/auth/login', {
+          replace: true,
+          state: {
+            ...location.state,
+            notice: result.message || 'Password reset successful',
+          },
+        })
         return
       }
 
@@ -288,17 +314,16 @@ export default function AuthPage({ mode = 'login' }) {
                     required
                   />
                 )}
-                {!isResetCode && (
-                  <AuthInput
-                    label="Email address"
-                    name="email"
-                    icon={Mail}
-                    type="email"
-                    placeholder="you@company.com"
-                    autoComplete="email"
-                    required
-                  />
-                )}
+                <AuthInput
+                  label="Email address"
+                  name="email"
+                  icon={Mail}
+                  type="email"
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  defaultValue={mode === 'reset' ? resetEmail : undefined}
+                  required
+                />
                 {mode !== 'reset' && (
                   <AuthInput
                     label="Password"
@@ -394,18 +419,16 @@ export default function AuthPage({ mode = 'login' }) {
               </button>
             </form>
 
-            {mode === 'reset' && (
+            {mode === 'reset' && isResetCode && (
               <button
                 type="button"
                 className="mx-auto mt-4 text-[11px] text-[#779366] hover:underline"
                 onClick={() => {
-                  setStage(isResetCode ? 'email' : 'code')
+                  setStage('email')
                   setNotice('')
                 }}
               >
-                {isResetCode
-                  ? 'Back to email entry'
-                  : 'Preview the OTP entry screen'}
+                Back to email entry
               </button>
             )}
             <div className="mt-6 border-t border-[#e5ebe3] pt-5 text-center text-[12px] text-[#8a988c] [@media(max-height:700px)]:mt-4 [@media(max-height:700px)]:pt-4">

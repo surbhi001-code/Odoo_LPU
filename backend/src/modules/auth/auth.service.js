@@ -1,9 +1,24 @@
 const bcrypt = require('bcrypt');
+const { fn, col, where } = require('sequelize');
 const { User } = require('../../database/models');
 const generateToken = require('../../utils/generateToken');
 const generateOtp = require('../../utils/generateOtp');
 const sendEmail = require('../../utils/sendEmail');
 const SALT_ROUNDS = 10;
+
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
+
+const findUserByEmail = (email) =>
+    User.findOne({
+        where: where(fn('LOWER', col('email')), normalizeEmail(email)),
+    });
+
+const otpMatches = (stored, submitted) => {
+    const expected = String(stored || '').replace(/\s/g, '');
+    const given = String(submitted || '').replace(/\s/g, '');
+    if (!expected || !given) return false;
+    return expected === given || Number(expected) === Number(given);
+};
 
 const signupRoles = ['warehouse_staff', 'inventory_manager'];
 
@@ -50,7 +65,7 @@ const login = async ({ email, password }) => {
 };
 
 const forgotPassword = async (email) => {
-    const user = await User.findOne({ where: { email } });
+    const user = await findUserByEmail(email);
     if (!user) {
         const err = new Error('No account found with this email');
         err.statusCode = 404;
@@ -60,12 +75,12 @@ const forgotPassword = async (email) => {
     const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    user.otp_code = otp;
+    user.otp_code = String(otp);
     user.otp_expires_at = expiresAt;
     await user.save();
 
    await sendEmail({
-    to: email,
+    to: user.email,
     subject: 'StockSense Password Reset OTP',
     text: `Your OTP is ${otp}. It expires in 10 minutes.`
 });
@@ -73,8 +88,13 @@ const forgotPassword = async (email) => {
 };
 
 const resetPassword = async ({ email, otp, newPassword }) => {
-    const user = await User.findOne({ where: { email } });
-    if (!user || user.otp_code !== otp) {
+    const user = await findUserByEmail(email);
+    if (!user) {
+        const err = new Error('No account found with this email');
+        err.statusCode = 404;
+        throw err;
+    }
+    if (!otpMatches(user.otp_code, otp)) {
         const err = new Error('Invalid OTP');
         err.statusCode = 400;
         throw err;
