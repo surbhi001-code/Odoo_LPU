@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, Search, Package, Pencil, MapPin } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Package,
+  Pencil,
+  MapPin,
+  CircleCheck,
+  TriangleAlert,
+  CircleX,
+  ArrowUpRight,
+} from 'lucide-react'
 import PageHeader from '../../components/layout/PageHeader'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
@@ -35,65 +45,103 @@ export default function ProductsPage() {
           : stockStatus(p) === stock)),
   )
   const filtered = Boolean(query || category || stock)
+  const categories = new Set(state.products.map((p) => p.category)).size
+  const productStats = [
+    {
+      label: 'Total products',
+      value: state.products.length,
+      detail: `${categories} categor${categories === 1 ? 'y' : 'ies'}`,
+      icon: Package,
+      tone: 'bg-[#eaf3e9] text-[#497451]',
+      line: 'bg-[#6f9875]',
+      filter: '',
+    },
+    {
+      label: 'In stock',
+      value: state.products.filter((p) => stockStatus(p) === 'In stock').length,
+      detail: 'Available and healthy',
+      icon: CircleCheck,
+      tone: 'bg-[#e8f4e9] text-[#397047]',
+      line: 'bg-[#559265]',
+      filter: 'In stock',
+    },
+    {
+      label: 'Low stock',
+      value: state.products.filter((p) => stockStatus(p) === 'Low stock').length,
+      detail: 'Review reorder levels',
+      icon: TriangleAlert,
+      tone: 'bg-[#fff1da] text-[#9a651c]',
+      line: 'bg-[#d49a43]',
+      filter: 'Low stock',
+    },
+    {
+      label: 'Out of stock',
+      value: state.products.filter((p) => stockStatus(p) === 'Out of stock')
+        .length,
+      detail: 'Restock required',
+      icon: CircleX,
+      tone: 'bg-[#f9e8e2] text-[#9a4f3c]',
+      line: 'bg-[#c97560]',
+      filter: 'Out of stock',
+    },
+  ]
   return (
     <>
       <PageHeader
-        eyebrow="YOUR INVENTORY"
         title="Products"
-        description="Know what you have, and where it belongs."
       >
         <Button onClick={() => setEditor({})}>
           <Plus size={17} />
           Add product
         </Button>
       </PageHeader>
-      <div className="flex items-center bg-white border border-[#e7ece9] rounded-[9px] p-[21px] mb-[23px] gap-7.5 [&>div]:flex [&>div]:items-center [&>div]:gap-2.5 [&>div]:text-[#819479] [&>div]:text-[11px] [&_strong]:text-[17px] [&_strong]:text-[#44603b] [&_strong]:mr-1 max-[1050px]:gap-5 max-[1050px]:flex-wrap max-[520px]:grid max-[520px]:grid-cols-2 max-[520px]:gap-[19px] max-[520px]:p-[17px] max-[520px]:[&>div]:text-[10px] max-[520px]:[&>div]:gap-[7px] max-[520px]:[&_strong]:text-[15px]">
-        <div>
-          <Package size={20} />
-          <span>
-            <strong>{state.products.length}</strong> total products
-          </span>
-        </div>
-        <div>
-          <span className="green bg-current text-[#688958] h-[7px] w-[7px] rounded-full [&.green]:text-[#91b481] [&.amber]:text-[#d3a358] [&.red]:text-[#cf8b7b]" />
-          <span>
-            <strong>
-              {
-                state.products.filter((p) => stockStatus(p) === 'In stock')
-                  .length
-              }
-            </strong>{' '}
-            in stock
-          </span>
-        </div>
-        <div>
-          <span className="amber bg-current text-[#c29751] h-[7px] w-[7px] rounded-full [&.green]:text-[#91b481] [&.amber]:text-[#d3a358] [&.red]:text-[#cf8b7b]" />
-          <span>
-            <strong>
-              {
-                state.products.filter((p) => stockStatus(p) === 'Low stock')
-                  .length
-              }
-            </strong>{' '}
-            low stock
-          </span>
-        </div>
-        <div>
-          <span className="red h-[7px] w-[7px] rounded-full bg-current [&.green]:text-[#91b481] [&.amber]:text-[#d3a358] [&.red]:text-[#cf8b7b]" />
-          <span>
-            <strong>
-              {
-                state.products.filter((p) => stockStatus(p) === 'Out of stock')
-                  .length
-              }
-            </strong>{' '}
-            out of stock
-          </span>
-        </div>
+      <div className="mb-4 grid grid-cols-4 gap-2.5 max-[1050px]:grid-cols-2 max-[520px]:gap-2">
+        {productStats.map((item) => {
+          const Icon = item.icon
+          const active = stock === item.filter || (!stock && !item.filter)
+          return (
+            <button
+              type="button"
+              key={item.label}
+              onClick={() => setParam('stock', item.filter)}
+              className={`group relative min-h-[96px] overflow-hidden rounded-[10px] border bg-white p-3.5 text-left shadow-[0_3px_10px_#173b290d] transition hover:-translate-y-0.5 hover:border-[#9bb49f] hover:shadow-[0_7px_18px_#173b2912] max-[520px]:min-h-[92px] max-[520px]:p-3 ${
+                active
+                  ? 'border-[#a9c1ae] ring-2 ring-[#dfeae1]'
+                  : 'border-[#dfe7e2]'
+              }`}
+            >
+              <span
+                className={`absolute inset-x-0 top-0 h-0.5 ${item.line}`}
+              />
+              <span className="flex items-start justify-between gap-2">
+                <span
+                  className={`grid size-7.5 place-items-center rounded-lg ${item.tone}`}
+                >
+                  <Icon size={17} strokeWidth={1.9} />
+                </span>
+                <ArrowUpRight
+                  size={14}
+                  className="text-[#96a49b] transition group-hover:text-[#476b51]"
+                />
+              </span>
+              <span className="mt-2 flex items-end gap-2">
+                <strong className="text-[24px] leading-none font-[750] tracking-[-1px] text-[#233f31]">
+                  {item.value.toLocaleString()}
+                </strong>
+                <span className="pb-0.5 text-[11px] font-semibold text-[#4c6254]">
+                  {item.label}
+                </span>
+              </span>
+              <span className="mt-1 block text-[9px] font-medium text-[#718077]">
+                {item.detail}
+              </span>
+            </button>
+          )
+        })}
       </div>
-      <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502]">
-        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#e4eae2] [&_select]:rounded-[5px] [&_select]:py-[7px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[10px] [&_select]:text-[#7c8c78] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8 py-4.5 px-[21px] flex gap-3 items-center max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-[15px] max-[520px]:gap-2.5 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[9px]">
-          <div className="search-input flex items-center gap-[9px] flex-1 text-[#98a48e] [&_input]:border-0 [&_input]:border-transparent [&_input]:text-[11px] [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#a0aa97]">
+      <section className="overflow-hidden rounded-xl border border-[#dfe7e2] bg-white shadow-[0_3px_10px_#153a2508] [&_table]:text-[12px] [&_th]:py-2.5 [&_th]:text-[9px] [&_th]:font-semibold [&_th]:text-[#617268] [&_td]:py-3 [&_td]:text-[#53645a]">
+        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#dce5df] [&_select]:rounded-[6px] [&_select]:py-[6px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[11px] [&_select]:font-medium [&_select]:text-[#53665a] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8.5 py-3 px-5 flex gap-2.5 items-center border-b border-[#edf1ee] max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-3 max-[520px]:gap-2 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[10px]">
+          <div className="search-input flex h-9 items-center gap-2.5 flex-1 rounded-md border border-[#dce5df] px-3 text-[#73847a] focus-within:border-[#7da086] focus-within:ring-2 focus-within:ring-[#e4ece6] [&_input]:border-0 [&_input]:border-transparent [&_input]:text-[12px] [&_input]:text-[#354b3e] [&_input]:outline-none [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#89988f]">
             <Search size={17} />
             <input
               aria-label="Search products"
@@ -211,7 +259,7 @@ export default function ProductsPage() {
             </EmptyState>
           }
         />
-        <div className="py-3 px-[21px] border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#a0ab98] [&>span]:text-[8px] [&>span]:text-[#a8b19f] max-[520px]:py-3 max-[520px]:px-[15px] max-[520px]:[&>span]:hidden">
+        <div className="py-2.5 px-5 border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#7d8c82] [&>span]:text-[9px] [&>span]:text-[#8b978f] max-[520px]:py-2.5 max-[520px]:px-3 max-[520px]:[&>span]:hidden">
           {rows.length} product{rows.length !== 1 ? 's' : ''}
           <span>Stock updates when operations are validated</span>
         </div>

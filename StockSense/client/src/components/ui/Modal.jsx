@@ -31,8 +31,8 @@ export default function Modal({
         if (event.target === ref.current) onClose()
       }}
     >
-      <div className="p-6.5 max-[520px]:p-[21px]">
-        <header className="flex items-start justify-between gap-4.5 mb-[25px] [&_h2]:text-[21px] [&_h2]:tracking-[-0.6px] [&_p]:text-[11px] [&_p]:leading-[1.7] [&_p]:text-[#88957d] [&_p]:mt-1.5 max-[520px]:[&_h2]:text-[20px]">
+      <div className="p-5.5 max-[520px]:p-[18px]">
+        <header className="mb-5 flex items-start justify-between gap-4 [&_h2]:text-[20px] [&_h2]:tracking-[-0.6px] [&_p]:mt-1 [&_p]:text-[11px] [&_p]:leading-[1.6] [&_p]:text-[#718174] max-[520px]:[&_h2]:text-[19px]">
           <div>
             <h2 id={titleId}>{title}</h2>
             {description && <p>{description}</p>}

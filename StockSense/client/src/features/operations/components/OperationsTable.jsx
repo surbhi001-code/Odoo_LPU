@@ -19,7 +19,7 @@ export default function OperationsTable({
           label: 'REFERENCE',
           render: (o) => (
             <button
-              className="text-link bg-transparent border-0 border-transparent p-0 inline-flex items-center gap-1.5 text-[#648853] text-[10px] font-[550] hover:text-[#254f2d] hover:underline"
+              className="text-link inline-flex items-center gap-1.5 border-0 border-transparent bg-transparent p-0 text-[11px] font-semibold text-[#4d7956] hover:text-[#254f2d] hover:underline"
               onClick={() => onSelect(o.id)}
             >
               {o.reference}
@@ -68,7 +68,7 @@ export default function OperationsTable({
         >
           {!filtered && onCreate && (
             <button
-              className="text-link bg-transparent border-0 border-transparent p-0 inline-flex items-center gap-1.5 text-[#648853] text-[10px] font-[550] hover:text-[#254f2d] hover:underline"
+              className="text-link inline-flex items-center gap-1.5 border-0 border-transparent bg-transparent p-0 text-[11px] font-semibold text-[#4d7956] hover:text-[#254f2d] hover:underline"
               onClick={onCreate}
             >
               Create your first operation <ArrowUpRight size={15} />

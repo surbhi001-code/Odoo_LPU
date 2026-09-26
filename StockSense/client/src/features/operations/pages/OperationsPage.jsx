@@ -9,22 +9,10 @@ import OperationsTable from '../components/OperationsTable'
 import OperationForm from '../components/OperationForm'
 import OperationDetails from '../components/OperationDetails'
 const descriptions = {
-  Receipt: [
-    'Receipts',
-    'Welcome incoming goods and keep your stock up to date.',
-  ],
-  Delivery: [
-    'Delivery orders',
-    'From your warehouse to your customers, keep every order moving.',
-  ],
-  Transfer: [
-    'Internal transfers',
-    'Move inventory between warehouses without losing track.',
-  ],
-  Adjustment: [
-    'Stock adjustments',
-    'Keep recorded stock aligned with what’s on your shelves.',
-  ],
+  Receipt: 'Receipts',
+  Delivery: 'Delivery orders',
+  Transfer: 'Internal transfers',
+  Adjustment: 'Stock adjustments',
 }
 export default function OperationsPage({ type }) {
   const { state } = useWorkspace()
@@ -61,9 +49,7 @@ export default function OperationsPage({ type }) {
   return (
     <>
       <PageHeader
-        eyebrow="OPERATIONS"
-        title={descriptions[type][0]}
-        description={descriptions[type][1]}
+        title={descriptions[type]}
       >
         <Button onClick={() => setCreate(true)}>
           <Plus size={17} />
@@ -71,7 +57,7 @@ export default function OperationsPage({ type }) {
         </Button>
       </PageHeader>
       <div
-        className="flex gap-6 border-b border-b-[#e0e7da] mb-5.5 overflow-x-auto [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:text-[11px] [&_button]:whitespace-nowrap [&_button]:border-0 [&_button]:border-transparent [&_button]:border-b-[2px] [&_button]:border-b-transparent [&_button]:bg-transparent [&_button]:pt-0 [&_button]:px-0 [&_button]:pb-3.5 [&_button]:text-[#96a088] [&_button.selected]:text-[#416738] [&_button.selected]:border-b-[#6f9258] [&_button_span]:text-[9px] [&_button_span]:py-[3px] [&_button_span]:px-1.5 [&_button_span]:bg-[#eef3e8] [&_button_span]:rounded-[4px] max-[800px]:gap-5.5"
+        className="mb-4 flex gap-5 overflow-x-auto border-b border-b-[#dce5df] [&_button]:flex [&_button]:items-center [&_button]:gap-2 [&_button]:whitespace-nowrap [&_button]:border-0 [&_button]:border-b-2 [&_button]:border-b-transparent [&_button]:bg-transparent [&_button]:px-0 [&_button]:pt-0 [&_button]:pb-2.5 [&_button]:text-[12px] [&_button]:font-medium [&_button]:text-[#708078] [&_button.selected]:border-b-[#5d8565] [&_button.selected]:font-semibold [&_button.selected]:text-[#315e3c] [&_button_span]:rounded-[5px] [&_button_span]:bg-[#e9f0e9] [&_button_span]:px-1.5 [&_button_span]:py-0.5 [&_button_span]:text-[9px] max-[800px]:gap-4"
         aria-label="Filter by operation status"
       >
         {['', ...statuses].map((s) => (
@@ -87,9 +73,9 @@ export default function OperationsPage({ type }) {
           </button>
         ))}
       </div>
-      <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502]">
-        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#e4eae2] [&_select]:rounded-[5px] [&_select]:py-[7px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[10px] [&_select]:text-[#7c8c78] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8 py-4.5 px-[21px] flex gap-3 items-center max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-[15px] max-[520px]:gap-2.5 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[9px]">
-          <div className="search-input flex items-center gap-[9px] flex-1 text-[#98a48e] [&_input]:border-0 [&_input]:border-transparent [&_input]:text-[11px] [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#a0aa97]">
+      <section className="overflow-hidden rounded-xl border border-[#dfe7e2] bg-white shadow-[0_3px_10px_#153a2508]">
+        <div className="[&_select]:appearance-auto [&_select]:border [&_select]:border-[#dce5df] [&_select]:rounded-[6px] [&_select]:py-[6px] [&_select]:pr-[23px] [&_select]:pl-2.5 [&_select]:bg-white [&_select]:text-[11px] [&_select]:font-medium [&_select]:text-[#53665a] [&_select]:min-w-30.5 [&_select]:max-w-55 [&_select]:h-8.5 py-3 px-5 flex gap-2.5 items-center border-b border-[#edf1ee] max-[1050px]:flex-wrap max-[1050px]:[&_.search-input]:basis-full max-[520px]:p-3 max-[520px]:gap-2 max-[520px]:[&_select]:min-w-0 max-[520px]:[&_select]:flex-1 max-[520px]:[&_select]:max-w-full max-[520px]:[&_select]:text-[10px]">
+          <div className="search-input flex h-8.5 items-center gap-2.5 flex-1 rounded-md border border-[#dce5df] px-3 text-[#73847a] focus-within:border-[#7da086] focus-within:ring-2 focus-within:ring-[#e4ece6] [&_input]:border-0 [&_input]:text-[12px] [&_input]:text-[#354b3e] [&_input]:outline-none [&_input]:w-full [&_input]:min-w-27.5 [&_input]:py-1.5 [&_input]:px-0 [&_input::placeholder]:text-[#89988f]">
             <Search size={17} />
             <input
               aria-label="Search operations"
@@ -118,7 +104,7 @@ export default function OperationsPage({ type }) {
           filtered={Boolean(query || status || warehouse)}
           onCreate={() => setCreate(true)}
         />
-        <div className="py-3 px-[21px] border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#a0ab98] [&>span]:text-[8px] [&>span]:text-[#a8b19f] max-[520px]:py-3 max-[520px]:px-[15px] max-[520px]:[&>span]:hidden">
+        <div className="py-2.5 px-5 border-t border-t-[#edf0e9] flex justify-between gap-3 text-[9px] text-[#7d8c82] [&>span]:text-[9px] [&>span]:text-[#8b978f] max-[520px]:px-3 max-[520px]:[&>span]:hidden">
           {rows.length} operation{rows.length !== 1 ? 's' : ''}
           <span>Drafts don’t affect your stock</span>
         </div>

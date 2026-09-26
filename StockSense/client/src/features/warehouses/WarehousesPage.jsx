@@ -38,7 +38,7 @@ function WarehouseForm({ warehouse, onClose }) {
       onClose={saving ? () => {} : onClose}
     >
       <form onSubmit={submit}>
-        <div className="flex flex-col gap-4.5">
+        <div className="flex flex-col gap-3.5">
           {[
             ['name', 'Warehouse name', 'e.g. Main warehouse'],
             ['code', 'Short code', 'e.g. WH-MAIN'],
@@ -62,7 +62,7 @@ function WarehouseForm({ warehouse, onClose }) {
             {error}
           </p>
         )}
-        <div className="border-t border-t-[#e7ece9] pt-[19px] mt-[25px] flex justify-end gap-2.5 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
+        <div className="border-t border-t-[#e7ece9] pt-4 mt-5 flex justify-end gap-2.5 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
           <Button
             variant="secondary"
             type="button"
@@ -101,9 +101,7 @@ export default function WarehousesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="A PLACE FOR EVERYTHING"
         title="Warehouses"
-        description="Manage your storage locations in one connected workspace."
       >
         <Button onClick={() => setEditor({})}>
           <Plus size={17} />
@@ -111,7 +109,7 @@ export default function WarehousesPage() {
         </Button>
       </PageHeader>
       {query && (
-        <div className="mb-5 flex items-center justify-between gap-3 rounded-lg border border-[#e4ebdc] bg-white px-4 py-3 text-xs text-[#7d9270]">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-[#dfe7df] bg-white px-4 py-2.5 text-xs text-[#65776a]">
           <span className="truncate">Search results for “{query}”</span>
           <button
             type="button"
@@ -122,27 +120,27 @@ export default function WarehousesPage() {
           </button>
         </div>
       )}
-      <div className="flex justify-between items-center mb-5 text-[11px] [&_h2]:flex [&_h2]:items-center [&_h2]:gap-[9px] max-[520px]:[&>.muted]:hidden">
+      <div className="flex justify-between items-center mb-3.5 text-[11px] [&_h2]:flex [&_h2]:items-center [&_h2]:gap-2 max-[520px]:[&>.muted]:hidden">
         <h2>
           All warehouses{' '}
           <span className="font-sans inline-flex items-center justify-center text-[9px] min-w-[21px] h-5 py-0 px-1.5 bg-[#f0f4ef] border border-[#e7eee3] text-[#89997e] rounded-[5px] tracking-[0]">
             {warehouses.length}
           </span>
         </h2>
-        <span className="muted text-[#84908b] font-normal">
+        <span className="muted text-[#66766c] font-medium">
           Stock availability by location
         </span>
       </div>
       {warehouses.length ? (
-        <div className="grid grid-cols-3 gap-5 max-[1250px]:grid-cols-2 max-[800px]:gap-3.5 max-[520px]:grid-cols-1">
+        <div className="grid grid-cols-3 gap-3.5 max-[1250px]:grid-cols-2 max-[800px]:gap-3 max-[520px]:grid-cols-1">
           {warehouses.map((w) => (
             <article
-              className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502] p-[23px] [&_.eyebrow]:block [&_h2]:text-[18px] [&_h2]:mb-[11px] [&_p]:flex [&_p]:items-center [&_p]:gap-[7px] [&_p]:text-[11px] [&_p]:text-[#97a188] [&_p]:leading-[1.7]"
+              className="overflow-hidden rounded-xl border border-[#dfe7e2] bg-white p-4.5 shadow-[0_3px_10px_#153a2508] transition hover:-translate-y-0.5 hover:border-[#9eb6a3] hover:shadow-[0_7px_18px_#173b2910] [&_.eyebrow]:block [&_h2]:mb-1.5 [&_h2]:text-[17px] [&_h2]:text-[#304b39] [&_p]:flex [&_p]:items-center [&_p]:gap-1.5 [&_p]:text-[11px] [&_p]:leading-[1.6] [&_p]:text-[#6e7e73]"
               key={w.id}
             >
-              <div className="flex items-center justify-between mb-5.5">
-                <span className="h-11.5 w-11.5 grid place-items-center text-[#83a270] bg-[#f0f5e9] border border-[#e1ead6] rounded-[10px]">
-                  <Warehouse size={25} />
+              <div className="flex items-center justify-between mb-3.5">
+                <span className="grid size-10 place-items-center rounded-[9px] border border-[#dce7d7] bg-[#edf4e9] text-[#668958]">
+                  <Warehouse size={22} />
                 </span>
                 <button
                   className="icon-button border-0 border-transparent inline-flex items-center justify-center w-[31px] h-[31px] rounded-[6px] bg-transparent text-[#819187] p-0 hover:bg-[#ecf2ed] hover:text-[#225c48]"
@@ -152,7 +150,7 @@ export default function WarehousesPage() {
                   <Pencil size={17} />
                 </button>
               </div>
-              <span className="eyebrow text-[9px] font-[650] tracking-[1.55px] text-[#7f9587] mb-[7px]">
+              <span className="eyebrow mb-1 text-[9px] font-[650] tracking-[1.45px] text-[#617865]">
                 {w.code}
               </span>
               <h2>{w.name}</h2>
@@ -160,7 +158,7 @@ export default function WarehousesPage() {
                 <MapPin size={15} />
                 {w.location}
               </p>
-              <div className="flex items-center gap-2 text-[11px] text-[#98a589] border-t border-t-[#e7ece9] pt-[19px] mt-5.5 [&_strong]:text-[#597d48]">
+              <div className="mt-3.5 flex items-center gap-2 border-t border-t-[#e7ece9] pt-3 text-[11px] text-[#6e7e73] [&_strong]:text-[#46724c]">
                 <Package size={17} />
                 <strong>
                   {state.products.filter((p) => quantityAt(p, w.id) > 0).length}

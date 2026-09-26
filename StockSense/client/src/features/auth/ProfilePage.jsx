@@ -20,27 +20,23 @@ export default function ProfilePage() {
   }
   return (
     <>
-      <PageHeader
-        eyebrow="YOUR SPACE"
-        title="My profile"
-        description="Your workspace and account, in one place."
-      />
-      <section className="bg-white border border-[#e7ece9] rounded-[9px] overflow-hidden shadow-[0_2px_3px_#153a2502] max-w-185 p-7.5 max-[520px]:p-5.5">
-        <div className="flex items-center gap-[17px] [&_p]:text-[12px] [&_p]:text-[#91a17f] [&_p]:mt-[7px] max-[520px]:[&_h2]:text-[16px]">
-          <span className="h-15 w-15 grid place-items-center bg-[#e8f0de] text-[#7e9a66] rounded-full">
-            <UserRound size={32} />
+      <PageHeader title="My profile" />
+      <section className="max-w-185 overflow-hidden rounded-xl border border-[#dfe7e2] bg-white p-5.5 shadow-[0_3px_10px_#153a2508] max-[520px]:p-4.5">
+        <div className="flex items-center gap-4 [&_p]:mt-1 [&_p]:text-[12px] [&_p]:text-[#65766b] max-[520px]:[&_h2]:text-[16px]">
+          <span className="grid size-13 place-items-center rounded-full bg-[#e7f0e1] text-[#617f50]">
+            <UserRound size={28} />
           </span>
           <div>
             <h2>{session.name}</h2>
             <p>{session.email}</p>
           </div>
         </div>
-        <div className="info-box py-[13px] px-[15px] bg-[#f6f9f1] border border-[#e5eddc] text-[#82916f] rounded-[7px] text-[11px] leading-[1.8] mt-5 [&_a]:underline [&_a]:text-[#517a3d]">
+        <div className="info-box mt-4 rounded-lg border border-[#dfe8d9] bg-[#f4f8f1] px-3.5 py-2.5 text-[11px] leading-[1.65] text-[#68775f] [&_a]:text-[#426c36] [&_a]:underline">
           This is a local frontend session. Your password is not stored or
           verified. Account authentication and password reset will be connected
           with the backend.
         </div>
-        <div className="border-t border-t-[#e7ece9] pt-[23px] mt-[23px] [&_p]:text-[12px] [&_p]:text-[#93a080] [&_p]:leading-[1.9] [&_p]:mt-[9px] [&_p]:mx-0 [&_p]:mb-[17px]">
+        <div className="mt-4.5 border-t border-t-[#e7ece9] pt-4.5 [&_p]:mx-0 [&_p]:mt-1.5 [&_p]:mb-3.5 [&_p]:text-[12px] [&_p]:leading-[1.65] [&_p]:text-[#68786d]">
           <h3>Your workspace data</h3>
           <p>
             Changes are saved in this browser. Export your JSON to keep a copy.
@@ -51,7 +47,7 @@ export default function ProfilePage() {
             Export workspace JSON
           </Button>
         </div>
-        <div className="border-t border-t-[#e7ece9] pt-[23px] mt-[23px] [&_p]:text-[12px] [&_p]:text-[#93a080] [&_p]:leading-[1.9] [&_p]:mt-[9px] [&_p]:mx-0 [&_p]:mb-[17px]">
+        <div className="mt-4.5 border-t border-t-[#e7ece9] pt-4.5 [&_p]:mx-0 [&_p]:mt-1.5 [&_p]:mb-3.5 [&_p]:text-[12px] [&_p]:leading-[1.65] [&_p]:text-[#68786d]">
           <h3>Your session</h3>
           <p>
             Sign out to return to the login screen. Your inventory data stays

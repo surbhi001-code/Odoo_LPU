@@ -44,7 +44,7 @@ export default function ProductForm({ product, onClose }) {
       onClose={saving ? () => {} : onClose}
     >
       <form onSubmit={submit}>
-        <div className="grid grid-cols-2 gap-y-[19px] gap-x-4 max-[520px]:grid-cols-1">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 max-[520px]:grid-cols-1">
           <Field
             label="Product name"
             placeholder="e.g. Steel rods"
@@ -131,7 +131,7 @@ export default function ProductForm({ product, onClose }) {
             {error}
           </p>
         )}
-        <div className="border-t border-t-[#e7ece9] pt-[19px] mt-[25px] flex justify-end gap-2.5 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
+        <div className="mt-5 flex justify-end gap-2.5 border-t border-t-[#e7ece9] pt-4 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
           <Button
             type="button"
             variant="secondary"

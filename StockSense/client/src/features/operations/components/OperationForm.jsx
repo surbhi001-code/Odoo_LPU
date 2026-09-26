@@ -77,7 +77,7 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
         </div>
       ) : (
         <form onSubmit={submit}>
-          <div className="grid grid-cols-2 gap-y-[19px] gap-x-4 max-[520px]:grid-cols-1">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3.5 max-[520px]:grid-cols-1">
             <Field label="Operation type" {...field('type')}>
               {operationTypes.map((type) => (
                 <option key={type}>{type}</option>
@@ -130,7 +130,7 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
               </Field>
             )}
           </div>
-          <div className="mt-[25px] mr-0 mb-[25px] ml-0 [&_h3]:mb-[16px]">
+          <div className="my-5 [&_h3]:mb-3">
             <h3>
               {form.type === 'Adjustment'
                 ? 'Physical inventory count'
@@ -138,7 +138,7 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
             </h3>
             {form.lines.map((line, index) => (
               <div
-                className="grid grid-cols-[1fr_135px_30px] gap-3 items-end mb-[17px] [&>.icon-button]:mb-1 max-[520px]:grid-cols-[1fr_85px_25px] max-[520px]:gap-2 max-[520px]:[&_.field]:text-[10px] max-[520px]:[&_select]:p-2 max-[520px]:[&_select]:text-[10px] max-[520px]:[&_.field_input]:text-[14px] max-[520px]:[&_.field_input]:p-2"
+                className="mb-3 grid grid-cols-[1fr_135px_30px] items-end gap-3 [&>.icon-button]:mb-1 max-[520px]:grid-cols-[1fr_85px_25px] max-[520px]:gap-2 max-[520px]:[&_.field]:text-[10px] max-[520px]:[&_select]:p-2 max-[520px]:[&_select]:text-[10px] max-[520px]:[&_.field_input]:text-[14px] max-[520px]:[&_.field_input]:p-2"
                 key={index}
               >
                 <Field
@@ -195,7 +195,7 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
               Add another product
             </Button>
           </div>
-          <label className="field flex flex-col gap-2 text-[11px] font-medium [&>span]:text-[#697c60] [&_b]:text-[#b49a74] [&_b]:font-normal [&_input]:w-full [&_input]:bg-white [&_input]:border [&_input]:border-[#dfe7d8] [&_input]:rounded-[6px] [&_input]:py-2.5 [&_input]:px-[11px] [&_input]:text-[12px] [&_input]:min-h-10 [&_select]:w-full [&_select]:bg-white [&_select]:border [&_select]:border-[#dfe7d8] [&_select]:rounded-[6px] [&_select]:py-2.5 [&_select]:px-[11px] [&_select]:text-[12px] [&_select]:min-h-10 [&_textarea]:w-full [&_textarea]:bg-white [&_textarea]:border [&_textarea]:border-[#dfe7d8] [&_textarea]:rounded-[6px] [&_textarea]:py-2.5 [&_textarea]:px-[11px] [&_textarea]:text-[12px] [&_textarea]:min-h-10 [&_input::placeholder]:text-[#aab4a1] [&_textarea::placeholder]:text-[#aab4a1] [&_small]:text-[10px] [&_small]:text-[#99a58b] [&_small]:leading-[1.6] [&_small]:font-normal max-[520px]:[&_input]:text-[16px] max-[520px]:[&_select]:text-[16px] max-[520px]:[&_textarea]:text-[16px]">
+          <label className="field flex flex-col gap-1.5 text-[11px] font-semibold [&>span]:text-[#53685a] [&_b]:text-[#b49a74] [&_b]:font-normal [&_textarea]:min-h-10 [&_textarea]:w-full [&_textarea]:rounded-[6px] [&_textarea]:border [&_textarea]:border-[#dbe5dd] [&_textarea]:bg-white [&_textarea]:px-[11px] [&_textarea]:py-2 [&_textarea]:text-[12px] [&_textarea::placeholder]:text-[#98a59c] max-[520px]:[&_textarea]:text-[16px]">
             <span>
               Notes{' '}
               <span className="muted text-[#84908b] font-normal">
@@ -222,7 +222,7 @@ export default function OperationForm({ initialType = 'Receipt', onClose }) {
               {error}
             </p>
           )}
-          <div className="border-t border-t-[#e7ece9] pt-[19px] mt-[25px] flex justify-end gap-2.5 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
+          <div className="mt-5 flex justify-end gap-2.5 border-t border-t-[#e7ece9] pt-4 max-[520px]:flex-wrap max-[520px]:[&_.button]:flex-1">
             <Button
               type="button"
               variant="secondary"

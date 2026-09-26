@@ -33,7 +33,7 @@ export default function Layout() {
         <Topbar onMenu={() => setMenuOpen(true)} menuOpen={menuOpen} />
         <main
           id="main-content"
-          className="pt-[31px] px-8.5 pb-5.5 flex-1 w-full max-w-425 m-auto min-[1600px]:pt-10 max-[1250px]:pt-[27px] max-[1250px]:px-6 max-[1250px]:pb-5.5 max-[800px]:py-[25px] max-[800px]:px-5 max-[520px]:py-6 max-[520px]:px-[15px]"
+          className="pt-4.5 px-7 pb-5 flex-1 w-full max-w-425 m-auto min-[1600px]:pt-5 max-[1250px]:pt-4 max-[1250px]:px-5 max-[800px]:py-4 max-[800px]:px-5 max-[520px]:py-4 max-[520px]:px-[15px]"
         >
           {error ? (
             <div
