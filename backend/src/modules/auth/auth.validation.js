@@ -30,13 +30,20 @@ const validateForgotPassword = (req, res, next) => {
 };
 
 const validateResetPassword = (req, res, next) => {
-    const { email, otp, newPassword } = req.body;
+    const email = String(req.body?.email || '').trim();
+    const otp = String(req.body?.otp || req.body?.code || req.body?.otp_code || '').trim();
+    const newPassword = String(
+        req.body?.newPassword || req.body?.password || req.body?.new_password || '',
+    );
     if (!email || !otp || !newPassword) {
         return res.status(400).json({ success: false, message: 'email, otp and newPassword are required' });
     }
     if (newPassword.length < 6) {
         return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
+    req.body.email = email;
+    req.body.otp = otp;
+    req.body.newPassword = newPassword;
     next();
 };
 
